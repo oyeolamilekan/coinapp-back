@@ -1,10 +1,11 @@
 from django.utils.crypto import get_random_string
+from lib.flutterwave import bill
 from lib.quidax import quidax
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from lib.flutterwave import bill
-from core.models import Bills, BillsRecharge, Transaction
+
+from core.models import Bills, BillsRecharge, Transaction, TransactionStatus
 
 
 class CreateBillAPIView(APIView):
@@ -78,7 +79,9 @@ class ReceiveWebhooks(APIView):
             )
             if recieved_amount < float(bill_recharge_obj.expected_amount):
                 return Response(
-                    data={"message": "amount rejected due it being less that expected amount."},
+                    data={
+                        "message": "amount rejected due it being less that expected amount."
+                    },
                     status=status.HTTP_200_OK,
                 )
 
@@ -90,7 +93,6 @@ class ReceiveWebhooks(APIView):
                 volume=float(bill_recharge_obj.expected_amount),
                 unit=bill_recharge_obj.recieving_currency.lower(),
             )
-            print(instant_order_object)
             bill_recharge_obj.is_paid = True
             bill_recharge_obj.save()
             instant_order_object_id = instant_order_object.get("data").get("id")
@@ -98,18 +100,24 @@ class ReceiveWebhooks(APIView):
                 "me",
                 instant_order_object_id,
             )
-            print(confirm_instant_object)
             total_amount = (
                 confirm_instant_object.get("data").get("receive").get("amount")
             )
-            data = {"bill": bill_recharge_obj, "amount": total_amount}
-            transaction_obj = Transaction.objects.create(**data)
-            transaction_obj.save()
             response = bill.buy_airtime(
                 bill_recharge_obj.recieving_id,
                 float(bill_recharge_obj.bills_type.amount),
             )
-            print(response)
+            data = {
+                "bill": bill_recharge_obj,
+                "amount": total_amount,
+                "status": TransactionStatus.SUCCESS,
+            }
+            if response.get("status") != "success":
+                data["reason"] = "airtime could not be released."
+                data["status"] = TransactionStatus.FAILED
+            transaction_obj = Transaction.objects.create(**data)
+            transaction_obj.save()
+
         return Response(
             data={"message": "successfully recieved payments."},
             status=status.HTTP_200_OK,

@@ -17,6 +17,7 @@ class TransactionStatus(models.TextChoices):
     """
 
     SUCCESS = "SUCCESS", _("SUCCESS")
+    FAILED = "FAILED", _("FAILED")
     OVER_PAID = "OVER_PAID", _("OVER_PAID")
 
 class BillStatus(models.TextChoices):
