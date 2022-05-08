@@ -47,6 +47,7 @@ class BillsType(models.TextChoices):
 class AcceptedCrypto(BaseModel):
     title = models.CharField(max_length=300)
     short_title = models.CharField(max_length=300)
+    ticker = models.CharField(max_length=200, null=True, blank=True)
     is_live = models.BooleanField(default=True)
 
     def __str__(self) -> str:
