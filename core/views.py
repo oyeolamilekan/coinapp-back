@@ -1,6 +1,7 @@
 from django.utils.crypto import get_random_string
 from core.serializers import AcceptedCryptoSerializer
 from lib.flutterwave import bill
+from lib.pusher import RealTimeService
 from lib.quidax import quidax
 from rest_framework import status
 from rest_framework.response import Response
@@ -37,7 +38,9 @@ class CreateBillAPIView(APIView):
                     data={"message": "error in getting it done."},
                     status=status.HTTP_200_OK,
                 )
-            accepted_curreny_obj = AcceptedCrypto.objects.get(short_title=transaction_currency)
+            accepted_curreny_obj = AcceptedCrypto.objects.get(
+                short_title=transaction_currency
+            )
 
             current_price_ticker_obj = quidax.markets.fetch_market_ticker(
                 accepted_curreny_obj.ticker
@@ -110,16 +113,28 @@ class ListAcceptedCryptoAPIView(APIView):
 
 class ReceiveWebhooks(APIView):
     def post(self, request):
+        realtime_service = RealTimeService()
+
         if request.data["event"] == "deposit.successful":
             recieved_amount = float(request.data.get("data").get("amount"))
 
             wallet_address = (
                 request.data.get("data").get("payment_address").get("address")
             )
+
             bill_recharge_obj = BillsRecharge.objects.get(
                 desposit_address=wallet_address
             )
+
             if recieved_amount < float(bill_recharge_obj.expected_amount):
+                realtime_service.push_event_to_frontend(
+                    "coinapp",
+                    "onRecieve",
+                    {
+                        "message": "amount rejected due it being less that expected amount.",
+                        "action": "REJECTED"
+                    },
+                )
                 return Response(
                     data={
                         "message": "amount rejected due it being less that expected amount."
@@ -135,32 +150,58 @@ class ReceiveWebhooks(APIView):
                 volume=float(bill_recharge_obj.expected_amount),
                 unit=bill_recharge_obj.related_currency.title.lower(),
             )
+
             instant_order_object_id = instant_order_object.get("data").get("id")
+
             confirm_instant_object = quidax.instant_orders.confirm_instant_orders(
                 "me",
                 instant_order_object_id,
             )
+
             bill_recharge_obj.is_paid = True
             bill_recharge_obj.save()
+
             total_amount = (
                 confirm_instant_object.get("data").get("receive").get("amount")
             )
+
             response = bill.buy_airtime(
                 bill_recharge_obj.recieving_id,
                 float(bill_recharge_obj.bills_type.amount),
             )
+
             buying_amount = float(bill_recharge_obj.bills_type.amount) * 0.03
+
             data = {
                 "bill": bill_recharge_obj,
                 "recieve_amount": total_amount,
                 "buying_amount": buying_amount,
                 "status": TransactionStatus.SUCCESS,
             }
+
             if response.get("status") != "success":
+                realtime_service.push_event_to_frontend(
+                    "coinapp",
+                    "onRecieve",
+                    {
+                        "message": "Crypto recieved and liquidated, but partner account failed. would manually credit your account",
+                        "action": "REJECTED"
+                    },
+                )
                 data["reason"] = "airtime could not be released."
                 data["status"] = TransactionStatus.FAILED
+
             transaction_obj = Transaction.objects.create(**data)
             transaction_obj.save()
+
+            realtime_service.push_event_to_frontend(
+                    "coinapp",
+                    "onRecieve",
+                    {
+                        "message": "Oshee, oba crypto, transaction has been successful.",
+                        "action": "ACCEPTED"
+                    },
+                )
 
         return Response(
             data={"message": "successfully recieved payments."},
