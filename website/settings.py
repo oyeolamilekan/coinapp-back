@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import platform
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,6 +90,8 @@ DATABASES = {
     }
 }
 
+if platform.system() == 'Linux':
+    DATABASES["default"] = db_from_env
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -117,6 +122,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+# The absolute path to the directory where collectstatic will collect static files for deployment.
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# The URL to use when referring to static files (where they will be served from)
+STATIC_URL = "/static/"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
