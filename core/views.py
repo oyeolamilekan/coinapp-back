@@ -1,4 +1,5 @@
 from django.utils.crypto import get_random_string
+from core.serializers import AcceptedCryptoSerializer
 from lib.flutterwave import bill
 from lib.quidax import quidax
 from rest_framework import status
@@ -91,6 +92,18 @@ class CreateBillAPIView(APIView):
                 data={"message": "Something bad happended"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ListAcceptedCryptoAPIView(APIView):
+    def get(self, request):
+        accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True)
+        accepted_crypto_serialized_obj = AcceptedCryptoSerializer(
+            accepted_crypto_object, many=True
+        )
+        return Response(
+            data=accepted_crypto_serialized_obj.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class ReceiveWebhooks(APIView):
