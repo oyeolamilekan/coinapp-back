@@ -17,6 +17,7 @@ psycopg2-binary = "*"
 pusher = "*"
 dj-database-url = "*"
 gunicorn = "*"
+whitenoise = "*"
 
 [requires]
 python_version = "3.10"
