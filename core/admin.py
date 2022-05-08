@@ -17,7 +17,7 @@ class AcceptedCryptoAdmin(admin.ModelAdmin):
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ("bill", "amount", "status")
+    list_display = ("bill", "recieve_amount", "buying_amount", "difference", "status")
 
 
 class BillsRechargeAdmin(admin.ModelAdmin):

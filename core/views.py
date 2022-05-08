@@ -149,9 +149,11 @@ class ReceiveWebhooks(APIView):
                 bill_recharge_obj.recieving_id,
                 float(bill_recharge_obj.bills_type.amount),
             )
+            buying_amount = float(bill_recharge_obj.bills_type.amount) * 0.03
             data = {
                 "bill": bill_recharge_obj,
-                "amount": total_amount,
+                "recieve_amount": total_amount,
+                "buying_amount": buying_amount,
                 "status": TransactionStatus.SUCCESS,
             }
             if response.get("status") != "success":

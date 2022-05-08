@@ -94,7 +94,8 @@ class BillsRecharge(BaseModel):
 
 class Transaction(BaseModel):
     bill = models.ForeignKey(BillsRecharge, on_delete=models.CASCADE)
-    amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
+    recieve_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
+    buying_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
     status = models.CharField(max_length=300, choices=TransactionStatus.choices)
 
     def __str__(self) -> str:
@@ -103,3 +104,7 @@ class Transaction(BaseModel):
     class Meta:
         verbose_name_plural = "Transaction"
         ordering = ("-created",)
+
+    @property
+    def difference(cls):
+        return cls.recieve_amount - cls.buying_amount
