@@ -89,6 +89,7 @@ class BillsRecharge(BaseModel):
     
     class Meta:
         verbose_name_plural = "Bills Recharge"
+        ordering = ("-created",)
 
 class Transaction(BaseModel):
     bill = models.ForeignKey(BillsRecharge, on_delete=models.CASCADE)
@@ -100,3 +101,4 @@ class Transaction(BaseModel):
     
     class Meta:
         verbose_name_plural = "Transaction"
+        ordering = ("-created",)
