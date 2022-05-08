@@ -70,6 +70,7 @@ class Bills(BaseModel):
     
     class Meta:
         verbose_name_plural = "Bills"
+        ordering = ("-created",)
 
 
 class BillsRecharge(BaseModel):
