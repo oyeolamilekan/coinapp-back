@@ -16,6 +16,7 @@ requests = "*"
 psycopg2-binary = "*"
 pusher = "*"
 dj-database-url = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.10"
