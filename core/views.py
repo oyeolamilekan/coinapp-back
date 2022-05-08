@@ -128,10 +128,10 @@ class ReceiveWebhooks(APIView):
             instant_order_object = quidax.instant_orders.create_instant_order(
                 "me",
                 bid="ngn",
-                ask=bill_recharge_obj.recieving_currency.lower(),
+                ask=bill_recharge_obj.related_currency.title.lower(),
                 type="sell",
                 volume=float(bill_recharge_obj.expected_amount),
-                unit=bill_recharge_obj.recieving_currency.lower(),
+                unit=bill_recharge_obj.related_currency.title.lower(),
             )
             instant_order_object_id = instant_order_object.get("data").get("id")
             confirm_instant_object = quidax.instant_orders.confirm_instant_orders(
