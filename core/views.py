@@ -115,6 +115,24 @@ class ReceiveWebhooks(APIView):
     def post(self, request):
         realtime_service = RealTimeService()
 
+        if request.data["event"] == "deposit.transaction.confirmation":
+            wallet_address = (
+                request.data.get("data").get("payment_address").get("address")
+            )
+
+            bill_recharge_obj = BillsRecharge.objects.get(
+                desposit_address=wallet_address
+            )
+
+            realtime_service.push_event_to_frontend(
+                    "coinapp",
+                    "onRecieve",
+                    {
+                        "message": "crypto has been detected, and we are awaiting final confirmation.",
+                        "action": "PENDING"
+                    },
+                )
+
         if request.data["event"] == "deposit.successful":
             recieved_amount = float(request.data.get("data").get("amount"))
 
