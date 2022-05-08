@@ -55,7 +55,7 @@ class CreateBillAPIView(APIView):
             )
             wallet_address = wallet_address_obj.get("data").get("address")
             bills_obj = Bills.objects.get(slug=bill_type)
-            estimated_amount = round(float(bills_obj.amount) / float(current_price), 6)
+            estimated_amount = round(float(bills_obj.amount) / float(current_price), 5)
             reference_id = f"COIN-APP-{get_random_string(length=20)}"
             currency_obj = AcceptedCrypto.objects.get(short_title=transaction_currency)
             data = {
