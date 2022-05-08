@@ -37,10 +37,10 @@ class CreateBillAPIView(APIView):
                     data={"message": "error in getting it done."},
                     status=status.HTTP_200_OK,
                 )
-            accepted_curreny_obj = AcceptedCrypto.objects.get(ticker=transaction_currency)
+            accepted_curreny_obj = AcceptedCrypto.objects.get(short_title=transaction_currency)
 
             current_price_ticker_obj = quidax.markets.fetch_market_ticker(
-                f"{transaction_currency}ngn"
+                accepted_curreny_obj.ticker
             )
             current_price = (
                 current_price_ticker_obj.get("data").get("ticker").get("last")
