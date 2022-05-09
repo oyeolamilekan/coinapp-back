@@ -3,10 +3,12 @@ from django.db import models
 from base.base_model import BaseModel
 from django.utils.translation import gettext_lazy as _
 
+
 class RecievingCurrenciesStatus(models.TextChoices):
     TRON = "TRX", _("TRX")
     LITECOIN = "LTC", _("LTC")
     DASH = "DASH", _("DASH")
+
 
 class TransactionStatus(models.TextChoices):
     """
@@ -19,6 +21,7 @@ class TransactionStatus(models.TextChoices):
     SUCCESS = "SUCCESS", _("SUCCESS")
     FAILED = "FAILED", _("FAILED")
     OVER_PAID = "OVER_PAID", _("OVER_PAID")
+
 
 class BillStatus(models.TextChoices):
     """
@@ -44,6 +47,7 @@ class BillsType(models.TextChoices):
     DATA = "DATA", _("DATA")
     POWER = "POWER", _("POWER")
 
+
 class AcceptedCrypto(BaseModel):
     title = models.CharField(max_length=300)
     short_title = models.CharField(max_length=300)
@@ -57,8 +61,22 @@ class AcceptedCrypto(BaseModel):
         verbose_name_plural = "Accepted Crypto"
 
 
+class Network(BaseModel):
+    title = models.CharField(max_length=300)
+    slug = models.SlugField()
+
+    def __str__(self) -> str:
+        return self.title
+
+
 class Bills(BaseModel):
     title = models.CharField(max_length=300)
+    network = models.ForeignKey(
+        Network,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )
     slug = models.SlugField()
     types = models.CharField(
         max_length=300,
@@ -68,7 +86,7 @@ class Bills(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.title} - {self.types} - {self.amount}"
-    
+
     class Meta:
         verbose_name_plural = "Bills"
         ordering = ("-created",)
@@ -80,17 +98,20 @@ class BillsRecharge(BaseModel):
     recieving_id = models.CharField(max_length=300)
     desposit_address = models.CharField(max_length=300)
     expected_amount = models.DecimalField(decimal_places=3, max_digits=20, default=0.00)
-    related_currency = models.ForeignKey(AcceptedCrypto, on_delete=models.CASCADE, null=True)
+    related_currency = models.ForeignKey(
+        AcceptedCrypto, on_delete=models.CASCADE, null=True
+    )
     is_abadoned = models.BooleanField(default=False)
     is_paid = models.BooleanField(default=False)
     transaction_receipt_email = models.CharField(max_length=300, null=True)
 
     def __str__(self) -> str:
         return f"{self.bills_type}"
-    
+
     class Meta:
         verbose_name_plural = "Bills Recharge"
         ordering = ("-created",)
+
 
 class Transaction(BaseModel):
     bill = models.ForeignKey(BillsRecharge, on_delete=models.CASCADE)
@@ -100,7 +121,7 @@ class Transaction(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.bill}"
-    
+
     class Meta:
         verbose_name_plural = "Transaction"
         ordering = ("-created",)

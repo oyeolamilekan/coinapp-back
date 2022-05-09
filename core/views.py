@@ -1,5 +1,4 @@
 from django.utils.crypto import get_random_string
-from core.serializers import AcceptedCryptoSerializer
 from lib.flutterwave import bill
 from lib.pusher import RealTimeService
 from lib.quidax import quidax
@@ -14,6 +13,7 @@ from core.models import (
     Transaction,
     TransactionStatus,
 )
+from core.serializers import AcceptedCryptoSerializer
 
 
 class CreateBillAPIView(APIView):
@@ -125,13 +125,13 @@ class ReceiveWebhooks(APIView):
             )
 
             realtime_service.push_event_to_frontend(
-                    "coinapp",
-                    "onRecieve",
-                    {
-                        "message": "crypto has been detected, and we are awaiting final confirmation.",
-                        "action": "PENDING"
-                    },
-                )
+                "coinapp",
+                "onRecieve",
+                {
+                    "message": "crypto has been detected, and we are awaiting final confirmation.",
+                    "action": "PENDING",
+                },
+            )
 
         if request.data["event"] == "deposit.successful":
             recieved_amount = float(request.data.get("data").get("amount"))
@@ -150,7 +150,7 @@ class ReceiveWebhooks(APIView):
                     "onRecieve",
                     {
                         "message": "amount rejected due it being less that expected amount.",
-                        "action": "REJECTED"
+                        "action": "REJECTED",
                     },
                 )
                 return Response(
@@ -203,7 +203,7 @@ class ReceiveWebhooks(APIView):
                     "onRecieve",
                     {
                         "message": "Crypto recieved and liquidated, but partner account failed. would manually credit your account",
-                        "action": "REJECTED"
+                        "action": "REJECTED",
                     },
                 )
                 data["reason"] = "airtime could not be released."
@@ -213,13 +213,13 @@ class ReceiveWebhooks(APIView):
             transaction_obj.save()
 
             realtime_service.push_event_to_frontend(
-                    "coinapp",
-                    "onRecieve",
-                    {
-                        "message": "Oshee, oba crypto, transaction has been successful.",
-                        "action": "ACCEPTED"
-                    },
-                )
+                "coinapp",
+                "onRecieve",
+                {
+                    "message": "Oshee, oba crypto, transaction has been successful.",
+                    "action": "ACCEPTED",
+                },
+            )
 
         return Response(
             data={"message": "successfully recieved payments."},

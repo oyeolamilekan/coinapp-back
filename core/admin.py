@@ -1,12 +1,19 @@
 from django.contrib import admin
 
-from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction
+from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction, Network
 
 
 class BillsAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "types",
+        "slug",
+    )
+    prepopulated_fields = {"slug": ("title",)}
+
+class NetworkAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
         "slug",
     )
     prepopulated_fields = {"slug": ("title",)}
@@ -38,3 +45,4 @@ admin.site.register(Bills, BillsAdmin)
 admin.site.register(BillsRecharge, BillsRechargeAdmin)
 admin.site.register(AcceptedCrypto, AcceptedCryptoAdmin)
 admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(Network, NetworkAdmin)
