@@ -42,10 +42,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "corsheaders",
     "core",
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -91,7 +95,7 @@ DATABASES = {
     }
 }
 
-if platform.system() == 'Linux':
+if platform.system() == "Linux":
     db_from_env = dj_database_url.config(conn_max_age=500)
     DATABASES["default"] = db_from_env
 # Password validation
