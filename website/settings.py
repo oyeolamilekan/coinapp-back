@@ -37,7 +37,7 @@ INSTALLED_APPS = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    "core.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
