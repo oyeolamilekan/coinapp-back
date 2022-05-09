@@ -12,8 +12,9 @@ from core.models import (
     BillsRecharge,
     Transaction,
     TransactionStatus,
+    Network,
 )
-from core.serializers import AcceptedCryptoSerializer
+from core.serializers import AcceptedCryptoSerializer, NetworkSerializer, BillsSerializer
 
 
 class CreateBillAPIView(APIView):
@@ -92,23 +93,67 @@ class CreateBillAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        except:
+        except Exception as e:
+            print(e)
             return Response(
                 data={"message": "Something bad happended"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class ListNetworksAPIView(APIView):
+
+    def get(self, request):
+        try:
+            network_object = Network.objects.all()
+            network_object_serialized_obj = NetworkSerializer(
+                network_object, many=True
+            )
+            return Response(
+                data=network_object_serialized_obj.data,
+                status=status.HTTP_200_OK,
+            )
+        except:
+            return Response(
+                data={"message": "error in fetching networks"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ListBillsAPIView(APIView):
+
+    def get(self, request, bill_type):
+        try:
+            print(bill_type)
+            bills_object = Bills.objects.filter(network__slug = bill_type)
+            bills_object_serialized_obj = BillsSerializer(
+                bills_object, many=True
+            )
+            return Response(
+                data=bills_object_serialized_obj.data,
+                status=status.HTTP_200_OK,
+            )
+        except:
+            return Response(
+                data={"message": "error in fetching networks"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class ListAcceptedCryptoAPIView(APIView):
     def get(self, request):
-        accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True)
-        accepted_crypto_serialized_obj = AcceptedCryptoSerializer(
-            accepted_crypto_object, many=True
-        )
-        return Response(
-            data=accepted_crypto_serialized_obj.data,
-            status=status.HTTP_200_OK,
-        )
+        try:
+
+            accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True)
+            accepted_crypto_serialized_obj = AcceptedCryptoSerializer(
+                accepted_crypto_object, many=True
+            )
+            return Response(
+                data=accepted_crypto_serialized_obj.data,
+                status=status.HTTP_200_OK,
+            )
+        except:
+            return Response(
+                data={"message": "error in fetching accepted cryptos"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ReceiveWebhooks(APIView):
