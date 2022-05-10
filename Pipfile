@@ -19,6 +19,8 @@ dj-database-url = "*"
 gunicorn = "*"
 whitenoise = "*"
 django-cors-headers = "==3.4.0"
+pillow = "*"
+django-cloudinary-storage = "*"
 
 [requires]
 python_version = "3.10"

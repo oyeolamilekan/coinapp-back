@@ -50,6 +50,7 @@ class BillsType(models.TextChoices):
 
 class AcceptedCrypto(BaseModel):
     title = models.CharField(max_length=300)
+    image = models.ImageField(null=True)
     short_title = models.CharField(max_length=300)
     ticker = models.CharField(max_length=200, null=True, blank=True)
     is_live = models.BooleanField(default=True)
@@ -63,6 +64,7 @@ class AcceptedCrypto(BaseModel):
 
 class Network(BaseModel):
     title = models.CharField(max_length=300)
+    image = models.ImageField(null=True)
     slug = models.SlugField()
 
     def __str__(self) -> str:

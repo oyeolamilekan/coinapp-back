@@ -5,13 +5,13 @@ from .models import AcceptedCrypto, Bills, Network
 class AcceptedCryptoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcceptedCrypto
-        fields = ("title", "short_title", "is_live")
+        fields = ("title", "image", "short_title", "is_live")
 
 
 class NetworkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network
-        fields = ("title", "slug")
+        fields = ("title", "image", "slug")
 
 
 class BillsSerializer(serializers.ModelSerializer):
