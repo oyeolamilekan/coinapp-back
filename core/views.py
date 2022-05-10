@@ -236,7 +236,9 @@ class ReceiveWebhooks(APIView):
                     float(bill_recharge_obj.bills_type.amount),
                 )
 
-                buying_amount = float(bill_recharge_obj.bills_type.amount) * 0.03
+                bill_amount = float(bill_recharge_obj.bills_type.amount)
+                
+                buying_amount = bill_amount - (bill_amount * 0.03)
 
                 data = {
                     "bill": bill_recharge_obj,
@@ -260,7 +262,7 @@ class ReceiveWebhooks(APIView):
                     data["status"] = TransactionStatus.FAILED
 
                 transaction_obj = Transaction.objects.create(**data)
-                
+
                 transaction_obj.save()
 
                 realtime_service.push_event_to_frontend(
