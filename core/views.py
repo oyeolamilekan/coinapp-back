@@ -159,120 +159,129 @@ class ListAcceptedCryptoAPIView(APIView):
 
 class ReceiveWebhooks(APIView):
     def post(self, request):
-        realtime_service = RealTimeService()
+        try:
+            realtime_service = RealTimeService()
 
-        if request.data["event"] == "deposit.transaction.confirmation":
-            wallet_address = (
-                request.data.get("data").get("payment_address").get("address")
-            )
+            if request.data["event"] == "deposit.transaction.confirmation":
+                wallet_address = (
+                    request.data.get("data").get("payment_address").get("address")
+                )
 
-            bill_recharge_obj = BillsRecharge.objects.get(
-                desposit_address=wallet_address
-            )
+                bill_recharge_obj = BillsRecharge.objects.get(
+                    desposit_address=wallet_address
+                )
 
-            realtime_service.push_event_to_frontend(
-                "coinapp",
-                "onRecieve",
-                {
-                    "message": "crypto has been detected, and we are awaiting final confirmation.",
-                    "action": "PENDING",
-                },
-            )
-
-        if request.data["event"] == "deposit.successful":
-            recieved_amount = float(request.data.get("data").get("amount"))
-
-            wallet_address = (
-                request.data.get("data").get("payment_address").get("address")
-            )
-
-            bill_recharge_obj = BillsRecharge.objects.get(
-                desposit_address=wallet_address
-            )
-
-            if recieved_amount < float(bill_recharge_obj.expected_amount):
                 realtime_service.push_event_to_frontend(
                     "coinapp",
                     "onRecieve",
                     {
-                        "message": "amount rejected due it being less that expected amount.",
-                        "action": "REJECTED",
+                        "message": "crypto has been detected, and we are awaiting final confirmation.",
+                        "action": "PENDING",
                     },
                 )
-                return Response(
-                    data={
-                        "message": "amount rejected due it being less that expected amount."
-                    },
-                    status=status.HTTP_200_OK,
+
+            if request.data["event"] == "deposit.successful":
+                recieved_amount = float(request.data.get("data").get("amount"))
+
+                wallet_address = (
+                    request.data.get("data").get("payment_address").get("address")
                 )
 
-            instant_order_object = quidax.instant_orders.create_instant_order(
-                "me",
-                bid="ngn",
-                ask=bill_recharge_obj.related_currency.title.lower(),
-                type="sell",
-                volume=float(bill_recharge_obj.expected_amount),
-                unit=bill_recharge_obj.related_currency.title.lower(),
-            )
+                bill_recharge_obj = BillsRecharge.objects.get(
+                    desposit_address=wallet_address
+                )
 
-            instant_order_object_id = instant_order_object.get("data").get("id")
+                if recieved_amount < float(bill_recharge_obj.expected_amount):
+                    realtime_service.push_event_to_frontend(
+                        "coinapp",
+                        "onRecieve",
+                        {
+                            "message": "amount rejected due it being less that expected amount.",
+                            "action": "REJECTED",
+                        },
+                    )
+                    return Response(
+                        data={
+                            "message": "amount rejected due it being less that expected amount."
+                        },
+                        status=status.HTTP_200_OK,
+                    )
 
-            confirm_instant_object = quidax.instant_orders.confirm_instant_orders(
-                "me",
-                instant_order_object_id,
-            )
+                instant_order_object = quidax.instant_orders.create_instant_order(
+                    "me",
+                    bid="ngn",
+                    ask=bill_recharge_obj.related_currency.short_title.lower(),
+                    type="sell",
+                    volume=float(bill_recharge_obj.expected_amount),
+                    unit=bill_recharge_obj.related_currency.short_title.lower(),
+                )
 
-            bill_recharge_obj.is_paid = True
-            bill_recharge_obj.save()
+                instant_order_object_id = instant_order_object.get("data").get("id")
 
-            total_amount = (
-                confirm_instant_object.get("data").get("receive").get("amount")
-            )
+                confirm_instant_object = quidax.instant_orders.confirm_instant_orders(
+                    "me",
+                    instant_order_object_id,
+                )
 
-            response = bill.buy_airtime(
-                bill_recharge_obj.recieving_id,
-                float(bill_recharge_obj.bills_type.amount),
-            )
+                bill_recharge_obj.is_paid = True
 
-            buying_amount = float(bill_recharge_obj.bills_type.amount) * 0.03
+                bill_recharge_obj.save()
 
-            data = {
-                "bill": bill_recharge_obj,
-                "recieve_amount": total_amount,
-                "buying_amount": buying_amount,
-                "instant_sell_response": confirm_instant_object,
-                "bill_payment_response": response,
-                "status": TransactionStatus.SUCCESS,
-            }
+                total_amount = (
+                    confirm_instant_object.get("data").get("receive").get("amount")
+                )
 
-            if response.get("status") != "success":
+                response = bill.buy_airtime(
+                    bill_recharge_obj.recieving_id,
+                    float(bill_recharge_obj.bills_type.amount),
+                )
+
+                buying_amount = float(bill_recharge_obj.bills_type.amount) * 0.03
+
+                data = {
+                    "bill": bill_recharge_obj,
+                    "recieve_amount": total_amount,
+                    "buying_amount": buying_amount,
+                    "instant_sell_response": confirm_instant_object,
+                    "bill_payment_response": response,
+                    "status": TransactionStatus.SUCCESS,
+                }
+
+                if response.get("status") != "success":
+                    realtime_service.push_event_to_frontend(
+                        "coinapp",
+                        "onRecieve",
+                        {
+                            "message": "Crypto recieved and liquidated, but partner account failed. would manually credit your account",
+                            "action": "REJECTED",
+                        },
+                    )
+                    data["reason"] = "airtime could not be released."
+                    data["status"] = TransactionStatus.FAILED
+
+                transaction_obj = Transaction.objects.create(**data)
+                
+                transaction_obj.save()
+
                 realtime_service.push_event_to_frontend(
                     "coinapp",
                     "onRecieve",
                     {
-                        "message": "Crypto recieved and liquidated, but partner account failed. would manually credit your account",
-                        "action": "REJECTED",
+                        "message": "Oshee, oba crypto, transaction has been successful.",
+                        "action": "ACCEPTED",
                     },
                 )
-                data["reason"] = "airtime could not be released."
-                data["status"] = TransactionStatus.FAILED
 
-            transaction_obj = Transaction.objects.create(**data)
-            transaction_obj.save()
-
-            realtime_service.push_event_to_frontend(
-                "coinapp",
-                "onRecieve",
-                {
-                    "message": "Oshee, oba crypto, transaction has been successful.",
-                    "action": "ACCEPTED",
-                },
+            return Response(
+                data={"message": "successfully recieved payments."},
+                status=status.HTTP_200_OK,
             )
 
-        return Response(
-            data={"message": "successfully recieved payments."},
-            status=status.HTTP_200_OK,
-        )
+        except:
+            return Response(
+                data={"message": "error in processing"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 def not_found(request, exception, *args, **kwargs):
