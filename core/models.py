@@ -99,7 +99,7 @@ class BillsRecharge(BaseModel):
     reference = models.CharField(max_length=355, blank=True, null=True)
     recieving_id = models.CharField(max_length=300)
     desposit_address = models.CharField(max_length=300)
-    expected_amount = models.DecimalField(decimal_places=3, max_digits=20, default=0.00)
+    expected_amount = models.DecimalField(decimal_places=5, max_digits=20, default=0.00)
     related_currency = models.ForeignKey(
         AcceptedCrypto,
         on_delete=models.CASCADE,
