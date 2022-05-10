@@ -41,8 +41,8 @@ class CreateBillAPIView(APIView):
                 ]
             ):
                 return Response(
-                    data={"message": "error in getting it done."},
-                    status=status.HTTP_200_OK,
+                    data={"message": "credentials not complete, kindly provide all the needed info."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             accepted_curreny_obj = AcceptedCrypto.objects.get(
                 short_title=transaction_currency
@@ -51,24 +51,33 @@ class CreateBillAPIView(APIView):
             current_price_ticker_obj = quidax.markets.fetch_market_ticker(
                 accepted_curreny_obj.ticker
             )
+
             current_price = (
                 current_price_ticker_obj.get("data").get("ticker").get("last")
             )
+
             generate_wallet_address_for_payment_obj = (
                 quidax.wallets.create_payment_address_for_a_cryptocurrency(
                     "me", transaction_currency
                 )
             )
+
             wallet_address_obj = quidax.wallets.get_payment_address_by_id(
                 "me",
                 transaction_currency,
                 generate_wallet_address_for_payment_obj.get("data").get("id"),
             )
+
             wallet_address = wallet_address_obj.get("data").get("address")
+
             bills_obj = Bills.objects.get(slug=bill_type)
+
             estimated_amount = round(float(bills_obj.amount) / float(current_price), 5)
+
             reference_id = f"COIN-APP-{get_random_string(length=20)}"
+
             currency_obj = AcceptedCrypto.objects.get(short_title=transaction_currency)
+
             data = {
                 "bills_type": bills_obj,
                 "reference": reference_id,
@@ -78,8 +87,11 @@ class CreateBillAPIView(APIView):
                 "desposit_address": wallet_address,
                 "related_currency": currency_obj,
             }
+
             bills_recharge = BillsRecharge.objects.create(**data)
+
             bills_recharge.save()
+
             return Response(
                 data={
                     "status": "success",
@@ -98,8 +110,7 @@ class CreateBillAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        except Exception as e:
-            print(e)
+        except:
             return Response(
                 data={"message": "Something bad happended"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -237,7 +248,7 @@ class ReceiveWebhooks(APIView):
                 )
 
                 bill_amount = float(bill_recharge_obj.bills_type.amount)
-                
+
                 buying_amount = bill_amount - (bill_amount * 0.03)
 
                 data = {
