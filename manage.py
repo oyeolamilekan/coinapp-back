@@ -1,12 +1,14 @@
-#!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
 import os
 import sys
 
+import platform
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
+    if platform.system() == "Linux":
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "website.settings.prod")
+    else:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "website.settings.local")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

@@ -1,8 +1,5 @@
 from pathlib import Path
 from decouple import config
-import platform
-import dj_database_url
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,9 +15,6 @@ SECRET_KEY = config("PROJECT_SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -76,18 +70,6 @@ WSGI_APPLICATION = "website.wsgi.application"
 
 DATABASES = {}
 
-if platform.system() == "Linux":
-    db_from_env = dj_database_url.config(conn_max_age=500)
-    DATABASES["default"] = db_from_env
-else:
-    DATABASES["default"] = {
-        "ENGINE": config("DATABASE_ENGINE"),
-        "NAME": config("DATABASE_NAME"),
-        "USER": config("DATABASE_USER"),
-        "PASSWORD": config("DATABASE_PASSWORD"),
-        "HOST": config("DATABASE_HOST"),
-        "PORT": config("DATABASE_PORT"),
-    }
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
