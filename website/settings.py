@@ -74,8 +74,13 @@ WSGI_APPLICATION = "website.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
+DATABASES = {}
+
+if platform.system() == "Linux":
+    db_from_env = dj_database_url.config(conn_max_age=500)
+    DATABASES["default"] = db_from_env
+else:
+    DATABASES["default"] = {
         "ENGINE": config("DATABASE_ENGINE"),
         "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
@@ -83,11 +88,6 @@ DATABASES = {
         "HOST": config("DATABASE_HOST"),
         "PORT": config("DATABASE_PORT"),
     }
-}
-
-if platform.system() == "Linux":
-    db_from_env = dj_database_url.config(conn_max_age=500)
-    DATABASES["default"] = db_from_env
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -106,7 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": config("CLOUD_NAME"),
     "API_KEY": config("CLOUDINARY_API_KEY"),
