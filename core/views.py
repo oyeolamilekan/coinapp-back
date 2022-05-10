@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 from lib.flutterwave import bill
 from lib.pusher import RealTimeService
@@ -10,11 +11,15 @@ from core.models import (
     AcceptedCrypto,
     Bills,
     BillsRecharge,
+    Network,
     Transaction,
     TransactionStatus,
-    Network,
 )
-from core.serializers import AcceptedCryptoSerializer, NetworkSerializer, BillsSerializer
+from core.serializers import (
+    AcceptedCryptoSerializer,
+    BillsSerializer,
+    NetworkSerializer,
+)
 
 
 class CreateBillAPIView(APIView):
@@ -100,14 +105,12 @@ class CreateBillAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-class ListNetworksAPIView(APIView):
 
+class ListNetworksAPIView(APIView):
     def get(self, request):
         try:
             network_object = Network.objects.all()
-            network_object_serialized_obj = NetworkSerializer(
-                network_object, many=True
-            )
+            network_object_serialized_obj = NetworkSerializer(network_object, many=True)
             return Response(
                 data=network_object_serialized_obj.data,
                 status=status.HTTP_200_OK,
@@ -115,18 +118,16 @@ class ListNetworksAPIView(APIView):
         except:
             return Response(
                 data={"message": "error in fetching networks"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-class ListBillsAPIView(APIView):
 
+class ListBillsAPIView(APIView):
     def get(self, request, bill_type):
         try:
             print(bill_type)
-            bills_object = Bills.objects.filter(network__slug = bill_type)
-            bills_object_serialized_obj = BillsSerializer(
-                bills_object, many=True
-            )
+            bills_object = Bills.objects.filter(network__slug=bill_type)
+            bills_object_serialized_obj = BillsSerializer(bills_object, many=True)
             return Response(
                 data=bills_object_serialized_obj.data,
                 status=status.HTTP_200_OK,
@@ -134,8 +135,9 @@ class ListBillsAPIView(APIView):
         except:
             return Response(
                 data={"message": "error in fetching networks"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 class ListAcceptedCryptoAPIView(APIView):
     def get(self, request):
@@ -152,7 +154,7 @@ class ListAcceptedCryptoAPIView(APIView):
         except:
             return Response(
                 data={"message": "error in fetching accepted cryptos"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -272,3 +274,11 @@ class ReceiveWebhooks(APIView):
             data={"message": "successfully recieved payments."},
             status=status.HTTP_200_OK,
         )
+
+
+def not_found(request, exception, *args, **kwargs):
+    """
+    Generic 400 error handler.
+    """
+    data = {"error": "Not found (404)"}
+    return JsonResponse(data, status=status.HTTP_400_BAD_REQUEST)
