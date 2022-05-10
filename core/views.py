@@ -125,7 +125,6 @@ class ListNetworksAPIView(APIView):
 class ListBillsAPIView(APIView):
     def get(self, request, bill_type):
         try:
-            print(bill_type)
             bills_object = Bills.objects.filter(network__slug=bill_type)
             bills_object_serialized_obj = BillsSerializer(bills_object, many=True)
             return Response(
