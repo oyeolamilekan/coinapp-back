@@ -11,6 +11,7 @@ class BillsAdmin(admin.ModelAdmin):
     )
     prepopulated_fields = {"slug": ("title",)}
 
+
 class NetworkAdmin(admin.ModelAdmin):
     list_display = (
         "title",
@@ -24,7 +25,14 @@ class AcceptedCryptoAdmin(admin.ModelAdmin):
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ("bill", "recieve_amount", "instant_order_status", "buying_amount", "difference", "status")
+    list_display = (
+        "bill",
+        "recieve_amount",
+        "instant_order_status",
+        "buying_amount",
+        "difference",
+        "status",
+    )
 
 
 class BillsRechargeAdmin(admin.ModelAdmin):
