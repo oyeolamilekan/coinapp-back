@@ -32,6 +32,7 @@ class InstantOrderStatus(models.TextChoices):
     """
 
     DONE = "DONE", _("DONE")
+    CONFIRM = "CONFIRM", _("CONFIRM")
     CANCELLED = "CANCELLED", _("CANCELLED")
 
 

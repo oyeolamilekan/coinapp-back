@@ -315,6 +315,7 @@ class ReceiveWebhooks(APIView):
                     "instant_sell_response": confirm_instant_object,
                     "bill_payment_response": response,
                     "status": TransactionStatus.SUCCESS,
+                    "instant_order_status": InstantOrderStatus.CONFIRM,
                 }
 
                 if response.get("status") != "success":
