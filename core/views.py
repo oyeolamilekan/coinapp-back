@@ -6,6 +6,7 @@ from lib.quidax import quidax
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.conf import settings
 
 from core.models import (
     AcceptedCrypto,
@@ -41,7 +42,9 @@ class CreateBillAPIView(APIView):
                 ]
             ):
                 return Response(
-                    data={"message": "credentials not complete, kindly provide all the needed info."},
+                    data={
+                        "message": "credentials not complete, kindly provide all the needed info."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             accepted_curreny_obj = AcceptedCrypto.objects.get(
@@ -171,6 +174,14 @@ class ListAcceptedCryptoAPIView(APIView):
 class ReceiveWebhooks(APIView):
     def post(self, request):
         try:
+            quidax_secret = request.META.get("quidax-signature", None)
+            print(request.META.get("quidax-signature"))
+            if quidax_secret != settings.WEBHOOK_SECRET:
+                return Response(
+                    data={"message": "No be me you run street guy."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             realtime_service = RealTimeService()
 
             if request.data["event"] == "deposit.transaction.confirmation":

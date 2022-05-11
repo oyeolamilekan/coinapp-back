@@ -107,6 +107,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+WEBHOOK_SECRET = config("WEBHOOK_SECRET")
 
 # The absolute path to the directory where collectstatic will collect static files for deployment.
 STATIC_ROOT = BASE_DIR / "staticfiles"
