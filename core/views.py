@@ -312,7 +312,7 @@ class ReceiveWebhooks(APIView):
                     "bill": bill_recharge_obj,
                     "recieve_amount": total_amount,
                     "buying_amount": buying_amount,
-                    "instant_sell_response": confirm_instant_object,
+                    "instant_order_response": confirm_instant_object,
                     "bill_payment_response": response,
                     "status": TransactionStatus.SUCCESS,
                     "instant_order_status": InstantOrderStatus.CONFIRM,
@@ -328,7 +328,7 @@ class ReceiveWebhooks(APIView):
                         },
                     )
                     data["reason"] = "airtime could not be released."
-                    data["status"] = TransactionStatus.FAILED
+                    data["bill_payment_status"] = TransactionStatus.FAILED
 
                 transaction_obj = Transaction.objects.create(**data)
 
