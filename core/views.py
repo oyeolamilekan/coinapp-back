@@ -56,7 +56,7 @@ class CreateBillAPIView(APIView):
             )
 
             current_price = (
-                current_price_ticker_obj.get("data").get("ticker").get("last")
+                current_price_ticker_obj.get("data").get("ticker").get("high")
             )
 
             generate_wallet_address_for_payment_obj = (
