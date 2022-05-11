@@ -175,7 +175,6 @@ class ReceiveWebhooks(APIView):
     def post(self, request):
         try:
             quidax_secret = request.META.get("HTTP_QUIDAX_SIGNATURE", None)
-            print(request.META.get("HTTP_QUIDAX_SIGNATURE"))
             if quidax_secret != settings.WEBHOOK_SECRET:
                 return Response(
                     data={"message": "No be me you run street guy."},
