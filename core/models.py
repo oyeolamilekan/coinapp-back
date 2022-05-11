@@ -142,6 +142,8 @@ class Transaction(BaseModel):
         choices=InstantOrderStatus.choices,
         default=InstantOrderStatus.DONE,
     )
+    instant_order_id = models.CharField(max_length=300, blank=True)
+    reason = models.CharField(max_length=300, blank=True)
     bill_payment_status = models.CharField(max_length=300, choices=TransactionStatus.choices)
 
     def __str__(self) -> str:

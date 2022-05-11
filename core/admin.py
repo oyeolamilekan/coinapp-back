@@ -28,10 +28,10 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = (
         "bill",
         "recieve_amount",
-        "instant_order_status",
         "buying_amount",
         "difference",
         "bill_payment_status",
+        "instant_order_status",
     )
 
 
