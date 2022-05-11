@@ -154,5 +154,5 @@ class Transaction(BaseModel):
         ordering = ("-created",)
 
     @property
-    def difference(cls):
+    def profit(cls):
         return cls.recieve_amount - cls.buying_amount

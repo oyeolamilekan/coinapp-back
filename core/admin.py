@@ -29,7 +29,7 @@ class TransactionAdmin(admin.ModelAdmin):
         "bill",
         "recieve_amount",
         "buying_amount",
-        "difference",
+        "profit",
         "bill_payment_status",
         "instant_order_status",
     )
