@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
+import traceback
 
 from core.models import (
     AcceptedCrypto,
@@ -109,12 +110,14 @@ class CreateBillAPIView(APIView):
             )
 
         except AcceptedCrypto.DoesNotExist:
+            traceback.print_exc()
             return Response(
                 data={"message": "Crypto does not exit."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         except:
+            traceback.print_exc()
             return Response(
                 data={"message": "Something bad happended"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -131,6 +134,7 @@ class ListNetworksAPIView(APIView):
                 status=status.HTTP_200_OK,
             )
         except:
+            traceback.print_exc()
             return Response(
                 data={"message": "error in fetching networks"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -147,6 +151,7 @@ class ListBillsAPIView(APIView):
                 status=status.HTTP_200_OK,
             )
         except:
+            traceback.print_exc()
             return Response(
                 data={"message": "error in fetching networks"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -166,6 +171,7 @@ class ListAcceptedCryptoAPIView(APIView):
                 status=status.HTTP_200_OK,
             )
         except:
+            traceback.print_exc()
             return Response(
                 data={"message": "error in fetching accepted cryptos"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -349,6 +355,7 @@ class ReceiveWebhooks(APIView):
             )
 
         except:
+            traceback.print_exc()
             return Response(
                 data={"message": "error in processing"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
