@@ -12,6 +12,7 @@ from core.models import (
     AcceptedCrypto,
     Bills,
     BillsRecharge,
+    InstantOrderStatus,
     Network,
     Transaction,
     TransactionStatus,
@@ -175,15 +176,17 @@ class ReceiveWebhooks(APIView):
     def post(self, request):
         try:
             quidax_secret = request.META.get("HTTP_QUIDAX_SIGNATURE", None)
+
             if quidax_secret != settings.WEBHOOK_SECRET:
                 return Response(
                     data={"message": "No be me you run street guy."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            realtime_service = RealTimeService()
 
             if request.data["event"] == "deposit.transaction.confirmation":
+                realtime_service = RealTimeService()
+
                 wallet_address = (
                     request.data.get("data").get("payment_address").get("address")
                 )
@@ -199,6 +202,50 @@ class ReceiveWebhooks(APIView):
                         "message": "crypto has been detected, and we are awaiting final confirmation.",
                         "action": "PENDING",
                     },
+                )
+
+            if request.data["event"] == "instant_order.cancelled":
+                wallet_address = (
+                    request.data.get("data").get("payment_address").get("address")
+                )
+
+                bill_recharge_obj = BillsRecharge.objects.get(
+                    desposit_address=wallet_address
+                )
+
+                transaction_obj = Transaction.objects.get(bill=bill_recharge_obj)
+
+                transaction_obj.instant_order_status = InstantOrderStatus.CANCELLED
+
+                transaction_obj.save()
+
+                return Response(
+                    data={
+                        "message": "order cancelled"
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            if request.data["event"] == "instant_order.done":
+                wallet_address = (
+                    request.data.get("data").get("payment_address").get("address")
+                )
+
+                bill_recharge_obj = BillsRecharge.objects.get(
+                    desposit_address=wallet_address
+                )
+
+                transaction_obj = Transaction.objects.get(bill=bill_recharge_obj)
+
+                transaction_obj.instant_order_status = InstantOrderStatus.DONE
+
+                transaction_obj.save()
+
+                return Response(
+                    data={
+                        "message": "order done and successfully fufilled."
+                    },
+                    status=status.HTTP_200_OK,
                 )
 
             if request.data["event"] == "deposit.successful":
