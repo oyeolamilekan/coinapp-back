@@ -31,7 +31,7 @@ class TransactionAdmin(admin.ModelAdmin):
         "instant_order_status",
         "buying_amount",
         "difference",
-        "status",
+        "bill_payment_status",
     )
 
 

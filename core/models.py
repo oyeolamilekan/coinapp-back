@@ -135,14 +135,14 @@ class Transaction(BaseModel):
     bill = models.ForeignKey(BillsRecharge, on_delete=models.CASCADE)
     recieve_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
     buying_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
-    instant_sell_response = models.JSONField(default=dict)
+    instant_order_response = models.JSONField(default=dict)
     bill_payment_response = models.JSONField(default=dict)
     instant_order_status = models.CharField(
         max_length=300,
         choices=InstantOrderStatus.choices,
         default=InstantOrderStatus.DONE,
     )
-    status = models.CharField(max_length=300, choices=TransactionStatus.choices)
+    bill_payment_status = models.CharField(max_length=300, choices=TransactionStatus.choices)
 
     def __str__(self) -> str:
         return f"{self.bill}"
