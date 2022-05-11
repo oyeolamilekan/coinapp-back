@@ -214,17 +214,7 @@ class ReceiveWebhooks(APIView):
             if request.data["event"] == "instant_order.cancelled":
                 instant_order_id = request.data.get("data").get("id")
 
-                print("instant_order.cancelled")
-
-                print(instant_order_id)
-                
-                bill_recharge_obj = BillsRecharge.objects.get(
-                    instant_order_id=instant_order_id
-                )
-
-                print(bill_recharge_obj)
-
-                transaction_obj = Transaction.objects.get(bill=bill_recharge_obj)
+                transaction_obj = Transaction.objects.get(instant_order_id=instant_order_id)
 
                 transaction_obj.instant_order_status = InstantOrderStatus.CANCELLED
 
@@ -240,18 +230,7 @@ class ReceiveWebhooks(APIView):
             if request.data["event"] == "instant_order.done":
                 instant_order_id = request.data.get("data").get("id")
 
-                print("instant_order.done")
-
-                print(instant_order_id)
-
-                bill_recharge_obj = BillsRecharge.objects.get(
-                    instant_order_id=instant_order_id
-                )
-
-                print(bill_recharge_obj)
-
-
-                transaction_obj = Transaction.objects.get(bill=bill_recharge_obj)
+                transaction_obj = Transaction.objects.get(instant_order_id=instant_order_id)
 
                 transaction_obj.instant_order_status = InstantOrderStatus.DONE
 
