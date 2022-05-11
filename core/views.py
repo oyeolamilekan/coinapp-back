@@ -320,7 +320,7 @@ class ReceiveWebhooks(APIView):
                     "buying_amount": buying_amount,
                     "instant_order_response": confirm_instant_object,
                     "bill_payment_response": response,
-                    "status": TransactionStatus.SUCCESS,
+                    "bill_payment_status": TransactionStatus.SUCCESS,
                     "instant_order_status": InstantOrderStatus.CONFIRM,
                 }
 
