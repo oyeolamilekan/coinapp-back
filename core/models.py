@@ -25,10 +25,11 @@ class TransactionStatus(models.TextChoices):
 
 class InstantOrderStatus(models.TextChoices):
     """
-    This choices are text used to denote the current status of a transaction.
+    This choices are denoted the transaction status
 
-    SUCCESS: Transaction has been successfully processed and both parties have been settled.
-    ABANDONED: If transaction has been abadoned
+    DONE: This transaction has been successfully executed
+    CONFIRM: This transactions has successfully been queued up for execution
+    CANCELLED: This order was cancelled by the exchange.
     """
 
     DONE = "DONE", _("DONE")
