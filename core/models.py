@@ -156,3 +156,7 @@ class Transaction(BaseModel):
     @property
     def profit(cls):
         return cls.recieve_amount - cls.buying_amount
+    
+    @property
+    def blockchain(cls):
+        return cls.related_currency.short_title

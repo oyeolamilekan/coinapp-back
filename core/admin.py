@@ -30,6 +30,7 @@ class TransactionAdmin(admin.ModelAdmin):
         "recieve_amount",
         "buying_amount",
         "profit",
+        "blockchain",
         "bill_payment_status",
         "instant_order_status",
     )
