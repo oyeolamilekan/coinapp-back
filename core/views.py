@@ -208,6 +208,7 @@ class ReceiveWebhooks(APIView):
                     "onRecieve",
                     {
                         "message": "crypto has been detected, and we are awaiting final confirmation.",
+                        "reference_id": bill_recharge_obj.recieving_id,
                         "action": "PENDING",
                     },
                 )
@@ -261,6 +262,7 @@ class ReceiveWebhooks(APIView):
                         "onRecieve",
                         {
                             "message": "amount rejected due it being less that expected amount.",
+                            "reference_id": bill_recharge_obj.recieving_id,
                             "action": "REJECTED",
                         },
                     )
@@ -355,6 +357,9 @@ class ReceiveWebhooks(APIView):
 
 class DispatchConfirmationRealTimeAPIView(APIView):
     def get(self, request):
+
+        reference_id = f"COIN-APP-{get_random_string(length=20)}"
+
         realtime_service = RealTimeService()
 
         realtime_service.push_event_to_frontend(
@@ -362,29 +367,34 @@ class DispatchConfirmationRealTimeAPIView(APIView):
             "onRecieve",
             {
                 "message": "Oshee, oba crypto, you money don reach blockchain, we just confirm am.",
+                "reference_id": reference_id,
                 "action": "PENDING",
             },
         )
         return Response(
             data={"message": "Dispatched realtime"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status=status.HTTP_200_OK,
         )
+
 
 class DispatchSuccessRealTimeAPIView(APIView):
     def get(self, request):
         realtime_service = RealTimeService()
+
+        reference_id = f"COIN-APP-{get_random_string(length=20)}"
 
         realtime_service.push_event_to_frontend(
             "coinapp",
             "onRecieve",
             {
                 "message": "Oshee, oba crypto, your money has been successfully processed.",
+                "reference_id": reference_id,
                 "action": "SUCCESS",
             },
         )
         return Response(
             data={"message": "Dispatched realtime"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status=status.HTTP_200_OK,
         )
 
 
