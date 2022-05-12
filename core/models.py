@@ -159,4 +159,4 @@ class Transaction(BaseModel):
     
     @property
     def blockchain(cls):
-        return cls.related_currency.short_title
+        return cls.bill.related_currency.title
