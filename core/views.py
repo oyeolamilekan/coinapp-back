@@ -144,7 +144,9 @@ class ListNetworksAPIView(APIView):
 class ListBillsAPIView(APIView):
     def get(self, request, bill_type):
         try:
-            bills_object = Bills.objects.filter(network__slug=bill_type).order_by("amount")
+            bills_object = Bills.objects.filter(network__slug=bill_type).order_by(
+                "amount"
+            )
             bills_object_serialized_obj = BillsSerializer(bills_object, many=True)
             return Response(
                 data=bills_object_serialized_obj.data,
@@ -189,7 +191,6 @@ class ReceiveWebhooks(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-
             realtime_service = RealTimeService()
 
             if request.data["event"] == "deposit.transaction.confirmation":
@@ -214,32 +215,32 @@ class ReceiveWebhooks(APIView):
             if request.data["event"] == "instant_order.cancelled":
                 instant_order_id = request.data.get("data").get("id")
 
-                transaction_obj = Transaction.objects.get(instant_order_id=instant_order_id)
+                transaction_obj = Transaction.objects.get(
+                    instant_order_id=instant_order_id
+                )
 
                 transaction_obj.instant_order_status = InstantOrderStatus.CANCELLED
 
                 transaction_obj.save()
 
                 return Response(
-                    data={
-                        "message": "order cancelled"
-                    },
+                    data={"message": "order cancelled"},
                     status=status.HTTP_200_OK,
                 )
 
             if request.data["event"] == "instant_order.done":
                 instant_order_id = request.data.get("data").get("id")
 
-                transaction_obj = Transaction.objects.get(instant_order_id=instant_order_id)
+                transaction_obj = Transaction.objects.get(
+                    instant_order_id=instant_order_id
+                )
 
                 transaction_obj.instant_order_status = InstantOrderStatus.DONE
 
                 transaction_obj.save()
 
                 return Response(
-                    data={
-                        "message": "order done and successfully fufilled."
-                    },
+                    data={"message": "order done and successfully fufilled."},
                     status=status.HTTP_200_OK,
                 )
 
@@ -350,6 +351,41 @@ class ReceiveWebhooks(APIView):
                 data={"message": "error in processing"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class DispatchConfirmationRealTimeAPIView(APIView):
+    def get(self, request):
+        realtime_service = RealTimeService()
+
+        realtime_service.push_event_to_frontend(
+            "coinapp",
+            "onRecieve",
+            {
+                "message": "Oshee, oba crypto, you money don reach blockchain, we just confirm am.",
+                "action": "PENDING",
+            },
+        )
+        return Response(
+            data={"message": "Dispatched realtime"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+class DispatchSuccessRealTimeAPIView(APIView):
+    def get(self, request):
+        realtime_service = RealTimeService()
+
+        realtime_service.push_event_to_frontend(
+            "coinapp",
+            "onRecieve",
+            {
+                "message": "Oshee, oba crypto, your money has been successfully processed.",
+                "action": "SUCCESS",
+            },
+        )
+        return Response(
+            data={"message": "Dispatched realtime"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 def not_found(request, exception, *args, **kwargs):
