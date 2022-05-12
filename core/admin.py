@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction, Network
 
+admin.site.site_header = 'COINAPP ADMIN'
+
+admin.site.site_title = 'COINAPP'
 
 class BillsAdmin(admin.ModelAdmin):
     list_display = (
