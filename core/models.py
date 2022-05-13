@@ -32,6 +32,7 @@ class BlockChainStatus(models.TextChoices):
 
     CONFIRMED = "CONFIRMED", _("CONFIRMED")
     REJECTED = "REJECTED", _("REJECTED")
+    PENDING = "PENDING", _("PENDING")
     CONFIRMATION = "CONFIRMATION", _("CONFIRMATION")
 
 
@@ -130,7 +131,7 @@ class BillsRecharge(BaseModel):
         max_length=300,
         blank=True,
         null=True,
-        default=BlockChainStatus.CONFIRMED,
+        default=BlockChainStatus.PENDING,
         choices=BlockChainStatus.choices,
     )
     is_overpaid = models.BooleanField(default=False)
