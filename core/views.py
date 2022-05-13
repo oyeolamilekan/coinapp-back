@@ -347,8 +347,8 @@ class ReceiveWebhooks(APIView):
 
 
 class ConfirmBillRechargeAPIView(APIView):
-    def get(self, request, recieving_id):
-        bills_recharge_obj = BillsRecharge.objects.get(recieving_id=recieving_id)
+    def get(self, request, reference):
+        bills_recharge_obj = BillsRecharge.objects.get(reference=reference)
         return Response(
             data={
                 "status": bills_recharge_obj.blockchain_deposit_status,

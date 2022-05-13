@@ -31,7 +31,7 @@ urlpatterns = [
         name="webhook_reciever",
     ),
     path(
-        "confirm_bill_recharge/<slug:recieving_id>/",
+        "confirm_bill_recharge/<slug:reference>/",
         ConfirmBillRechargeAPIView.as_view(),
         name="confirm_bill_recharge",
     ),
