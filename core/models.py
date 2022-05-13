@@ -23,6 +23,18 @@ class TransactionStatus(models.TextChoices):
     OVER_PAID = "OVER_PAID", _("OVER_PAID")
 
 
+class BlockChainStatus(models.TextChoices):
+    """
+    This is the status of a block chain
+    CONFIRMED
+    REJECTED
+    """
+
+    CONFIRMED = "CONFIRMED", _("CONFIRMED")
+    REJECTED = "REJECTED", _("REJECTED")
+    CONFIRMATION = "CONFIRMATION", _("CONFIRMATION")
+
+
 class InstantOrderStatus(models.TextChoices):
     """
     This choices are denoted the transaction status
@@ -114,6 +126,14 @@ class BillsRecharge(BaseModel):
     recieving_id = models.CharField(max_length=300)
     desposit_address = models.CharField(max_length=300)
     expected_amount = models.DecimalField(decimal_places=5, max_digits=20, default=0.00)
+    blockchain_deposit_status = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        default=BlockChainStatus.CONFIRMED,
+        choices=BlockChainStatus.choices,
+    )
+    is_overpaid = models.BooleanField(default=False)
     related_currency = models.ForeignKey(
         AcceptedCrypto,
         on_delete=models.CASCADE,
@@ -144,7 +164,9 @@ class Transaction(BaseModel):
     )
     instant_order_id = models.CharField(max_length=300, blank=True)
     reason = models.CharField(max_length=300, blank=True)
-    bill_payment_status = models.CharField(max_length=300, choices=TransactionStatus.choices)
+    bill_payment_status = models.CharField(
+        max_length=300, choices=TransactionStatus.choices
+    )
 
     def __str__(self) -> str:
         return f"{self.bill}"
@@ -156,7 +178,7 @@ class Transaction(BaseModel):
     @property
     def profit(cls):
         return cls.recieve_amount - cls.buying_amount
-    
+
     @property
     def blockchain(cls):
         return cls.bill.related_currency.title

@@ -6,9 +6,7 @@ from .views import (
     ListAcceptedCryptoAPIView,
     ListNetworksAPIView,
     ListBillsAPIView,
-    DispatchSuccessRealTimeAPIView,
-    DispatchConfirmationRealTimeAPIView,
-
+    ConfirmBillRechargeAPIView,
 )
 
 urlpatterns = [
@@ -33,14 +31,9 @@ urlpatterns = [
         name="webhook_reciever",
     ),
     path(
-        "dispatch_confirmation/",
-        DispatchSuccessRealTimeAPIView.as_view(),
-        name="dispatch_confirmation",
-    ),
-    path(
-        "dispatch_success/",
-        DispatchSuccessRealTimeAPIView.as_view(),
-        name="dispatch_confirmation",
+        "confirm_bill_recharge/<slug:recieving_id>/",
+        ConfirmBillRechargeAPIView.as_view(),
+        name="confirm_bill_recharge",
     ),
     path(
         "create_deposit_address/",

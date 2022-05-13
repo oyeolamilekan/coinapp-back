@@ -13,6 +13,7 @@ from core.models import (
     AcceptedCrypto,
     Bills,
     BillsRecharge,
+    BlockChainStatus,
     InstantOrderStatus,
     Network,
     Transaction,
@@ -29,10 +30,13 @@ class CreateBillAPIView(APIView):
     def post(self, request):
         try:
             destination_id = request.data.get("destination_id", None)
+
             bill_type = request.data.get("bill_type", None)
+
             transaction_receipt_email = request.data.get(
                 "transaction_receipt_email", None
             )
+
             transaction_currency = request.data.get("transaction_currency", None)
 
             if not all(
@@ -49,6 +53,7 @@ class CreateBillAPIView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             accepted_curreny_obj = AcceptedCrypto.objects.get(
                 short_title=transaction_currency
             )
@@ -203,15 +208,15 @@ class ReceiveWebhooks(APIView):
                     desposit_address=wallet_address
                 )
 
-                realtime_service.push_event_to_frontend(
-                    "coinapp",
-                    "onRecieve",
-                    {
-                        "message": "crypto has been detected, and we are awaiting final confirmation.",
-                        "reference_id": bill_recharge_obj.recieving_id,
-                        "action": "PENDING",
-                    },
+                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.CONFIRMATION
+
+                bill_recharge_obj.save()
+
+                return Response(
+                    data={"message": "deposit confirmed"},
+                    status=status.HTTP_200_OK,
                 )
+
 
             if request.data["event"] == "instant_order.cancelled":
                 instant_order_id = request.data.get("data").get("id")
@@ -256,22 +261,20 @@ class ReceiveWebhooks(APIView):
                     desposit_address=wallet_address
                 )
 
+                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.CONFIRMED
+
                 if recieved_amount < float(bill_recharge_obj.expected_amount):
-                    realtime_service.push_event_to_frontend(
-                        "coinapp",
-                        "onRecieve",
-                        {
-                            "message": "amount rejected due it being less that expected amount.",
-                            "reference_id": bill_recharge_obj.recieving_id,
-                            "action": "REJECTED",
-                        },
-                    )
+
+                    bill_recharge_obj.is_overpaid = True
+
                     return Response(
                         data={
                             "message": "amount rejected due it being less that expected amount."
                         },
                         status=status.HTTP_200_OK,
                     )
+                
+                bill_recharge_obj.save()
 
                 instant_order_object = quidax.instant_orders.create_instant_order(
                     "me",
@@ -317,18 +320,6 @@ class ReceiveWebhooks(APIView):
                     "instant_order_status": InstantOrderStatus.CONFIRM,
                 }
 
-                if response.get("status") != "success":
-                    realtime_service.push_event_to_frontend(
-                        "coinapp",
-                        "onRecieve",
-                        {
-                            "message": "Crypto recieved and liquidated, but partner account failed. would manually credit your account",
-                            "action": "REJECTED",
-                        },
-                    )
-                    data["reason"] = "airtime could not be released."
-                    data["bill_payment_status"] = TransactionStatus.FAILED
-
                 transaction_obj = Transaction.objects.create(**data)
 
                 transaction_obj.save()
@@ -355,45 +346,13 @@ class ReceiveWebhooks(APIView):
             )
 
 
-class DispatchConfirmationRealTimeAPIView(APIView):
-    def get(self, request):
-
-        reference_id = f"COIN-APP-{get_random_string(length=20)}"
-
-        realtime_service = RealTimeService()
-
-        realtime_service.push_event_to_frontend(
-            "coinapp",
-            "onRecieve",
-            {
-                "message": "Oshee, oba crypto, you money don reach blockchain, we just confirm am.",
-                "reference_id": reference_id,
-                "action": "PENDING",
-            },
-        )
+class ConfirmBillRechargeAPIView(APIView):
+    def get(self, request, recieving_id):
+        bills_recharge_obj = BillsRecharge.objects.get(recieving_id=recieving_id)
         return Response(
-            data={"message": "Dispatched realtime"},
-            status=status.HTTP_200_OK,
-        )
-
-
-class DispatchSuccessRealTimeAPIView(APIView):
-    def get(self, request):
-        realtime_service = RealTimeService()
-
-        reference_id = f"COIN-APP-{get_random_string(length=20)}"
-
-        realtime_service.push_event_to_frontend(
-            "coinapp",
-            "onRecieve",
-            {
-                "message": "Oshee, oba crypto, your money has been successfully processed.",
-                "reference_id": reference_id,
-                "action": "SUCCESS",
+            data={
+                "status": bills_recharge_obj.blockchain_deposit_status,
             },
-        )
-        return Response(
-            data={"message": "Dispatched realtime"},
             status=status.HTTP_200_OK,
         )
 
