@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 from lib.flutterwave import bill
-from lib.pusher import RealTimeService
 from lib.quidax import quidax
 from rest_framework import status
 from rest_framework.response import Response
@@ -196,8 +195,6 @@ class ReceiveWebhooks(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            realtime_service = RealTimeService()
-
             if request.data["event"] == "deposit.transaction.confirmation":
 
                 wallet_address = (
@@ -324,14 +321,6 @@ class ReceiveWebhooks(APIView):
 
                 transaction_obj.save()
 
-                realtime_service.push_event_to_frontend(
-                    "coinapp",
-                    "onRecieve",
-                    {
-                        "message": "Oshee, oba crypto, transaction has been successful.",
-                        "action": "ACCEPTED",
-                    },
-                )
 
             return Response(
                 data={"message": "successfully recieved payments."},

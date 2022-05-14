@@ -73,6 +73,7 @@ class BillsType(models.TextChoices):
     """
 
     AIRTIME = "AIRTIME", _("AIRTIME")
+    GIFTCARD = "GIFTCARD", _("GIFTCARD")
     DATA = "DATA", _("DATA")
     POWER = "POWER", _("POWER")
 
