@@ -49,6 +49,7 @@ class BillsRechargeAdmin(admin.ModelAdmin):
         "is_abadoned",
         "is_paid",
         "related_currency",
+        "blockchain_deposit_status",
         "transaction_receipt_email",
     )
 
