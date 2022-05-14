@@ -261,7 +261,7 @@ class ReceiveWebhooks(APIView):
                     desposit_address=wallet_address
                 )
 
-                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.CONFIRMED
+                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.SUCCESSFUL
 
                 if recieved_amount < float(bill_recharge_obj.expected_amount):
 

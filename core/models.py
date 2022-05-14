@@ -26,11 +26,13 @@ class TransactionStatus(models.TextChoices):
 class BlockChainStatus(models.TextChoices):
     """
     This is the status of a block chain
-    CONFIRMED
-    REJECTED
+    SUCCESSFUL: The transaction has been successful, and accepted by the blockchain
+    REJECTED: The transaction has failed, and rejected by the blockchain
+    PENDING: Transactions has just been initialized
+    CONFIRMATION: Transaction is being confirmed by the blockchain
     """
 
-    CONFIRMED = "CONFIRMED", _("CONFIRMED")
+    SUCCESSFUL = "SUCCESSFUL", _("SUCCESSFUL")
     REJECTED = "REJECTED", _("REJECTED")
     PENDING = "PENDING", _("PENDING")
     CONFIRMATION = "CONFIRMATION", _("CONFIRMATION")
