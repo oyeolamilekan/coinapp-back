@@ -10,6 +10,11 @@ class RecievingCurrenciesStatus(models.TextChoices):
     DASH = "DASH", _("DASH")
 
 
+class CurrencyType(models.TextChoices):
+    DOLLARS = "DOLLARS", _("DOLLARS")
+    NAIRA = "NAIRA", _("NAIRA")
+
+
 class TransactionStatus(models.TextChoices):
     """
     This choices are text used to denote the current status of a transaction.
@@ -113,6 +118,11 @@ class Bills(BaseModel):
     types = models.CharField(
         max_length=300,
         choices=BillsType.choices,
+    )
+    currency = models.CharField(
+        max_length=300,
+        choices=CurrencyType.choices,
+        default=CurrencyType.NAIRA,
     )
     amount = models.DecimalField(decimal_places=3, max_digits=20)
 
