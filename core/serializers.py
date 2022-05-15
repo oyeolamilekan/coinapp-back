@@ -18,7 +18,7 @@ class NetworkSerializer(serializers.ModelSerializer):
 class BillsSerializer(serializers.ModelSerializer):
 
     amount = SerializerMethodField()
-    
+
     class Meta:
         model = Bills
         fields = (
@@ -29,4 +29,4 @@ class BillsSerializer(serializers.ModelSerializer):
         )
     
     def get_amount(self, obj):
-        return int(obj.amount)
+        return f"{int(obj.amount):,}"
