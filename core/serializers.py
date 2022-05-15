@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import AcceptedCrypto, Bills, Network
 
+from rest_framework.fields import SerializerMethodField
 
 class AcceptedCryptoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,6 +16,9 @@ class NetworkSerializer(serializers.ModelSerializer):
 
 
 class BillsSerializer(serializers.ModelSerializer):
+
+    amount = SerializerMethodField()
+    
     class Meta:
         model = Bills
         fields = (
@@ -23,3 +27,6 @@ class BillsSerializer(serializers.ModelSerializer):
             "types",
             "amount",
         )
+    
+    def get_amount(self, obj):
+        return int(obj.amount)
