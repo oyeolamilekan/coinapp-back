@@ -352,6 +352,7 @@ class FetchCurrentRateAPIView(APIView):
     """
     Fetches current price of crypto from quidax.
     """
+
     def get(self, request, coin_type):
         accepted_curreny_obj = AcceptedCrypto.objects.get(short_title=coin_type)
         current_price_ticker_obj = quidax.markets.fetch_market_ticker(
@@ -359,9 +360,11 @@ class FetchCurrentRateAPIView(APIView):
         )
         price = current_price_ticker_obj.get("data").get("ticker").get("low")
         data = {
-            "price": price,
-            "ticker": accepted_curreny_obj.ticker,
-            "coin": accepted_curreny_obj.title,
+            "data": {
+                "price": price,
+                "ticker": accepted_curreny_obj.ticker,
+                "coin": accepted_curreny_obj.title,
+            }
         }
         return Response(
             data=data,
