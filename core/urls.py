@@ -7,6 +7,7 @@ from .views import (
     ListNetworksAPIView,
     ListBillsAPIView,
     ConfirmBillRechargeAPIView,
+    FetchCurrentRateAPIView,
 )
 
 urlpatterns = [
@@ -39,5 +40,10 @@ urlpatterns = [
         "create_deposit_address/",
         CreateBillAPIView.as_view(),
         name="create_deposit_address",
+    ),
+    path(
+        "fetch_current_price/<slug:coin_type>/",
+        FetchCurrentRateAPIView.as_view(),
+        name="fetch_current_price",
     ),
 ]

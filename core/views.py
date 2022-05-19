@@ -205,7 +205,9 @@ class ReceiveWebhooks(APIView):
                     desposit_address=wallet_address
                 )
 
-                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.CONFIRMATION
+                bill_recharge_obj.blockchain_deposit_status = (
+                    BlockChainStatus.CONFIRMATION
+                )
 
                 bill_recharge_obj.save()
 
@@ -213,7 +215,6 @@ class ReceiveWebhooks(APIView):
                     data={"message": "deposit confirmed"},
                     status=status.HTTP_200_OK,
                 )
-
 
             if request.data["event"] == "instant_order.cancelled":
                 instant_order_id = request.data.get("data").get("id")
@@ -258,7 +259,9 @@ class ReceiveWebhooks(APIView):
                     desposit_address=wallet_address
                 )
 
-                bill_recharge_obj.blockchain_deposit_status = BlockChainStatus.SUCCESSFUL
+                bill_recharge_obj.blockchain_deposit_status = (
+                    BlockChainStatus.SUCCESSFUL
+                )
 
                 if recieved_amount < float(bill_recharge_obj.expected_amount):
 
@@ -270,7 +273,7 @@ class ReceiveWebhooks(APIView):
                         },
                         status=status.HTTP_200_OK,
                     )
-                
+
                 bill_recharge_obj.save()
 
                 instant_order_object = quidax.instant_orders.create_instant_order(
@@ -321,7 +324,6 @@ class ReceiveWebhooks(APIView):
 
                 transaction_obj.save()
 
-
             return Response(
                 data={"message": "successfully recieved payments."},
                 status=status.HTTP_200_OK,
@@ -342,6 +344,27 @@ class ConfirmBillRechargeAPIView(APIView):
             data={
                 "status": bills_recharge_obj.blockchain_deposit_status,
             },
+            status=status.HTTP_200_OK,
+        )
+
+
+class FetchCurrentRateAPIView(APIView):
+    """
+    Fetches current price of crypto from quidax.
+    """
+    def get(self, request, coin_type):
+        accepted_curreny_obj = AcceptedCrypto.objects.get(short_title=coin_type)
+        current_price_ticker_obj = quidax.markets.fetch_market_ticker(
+            accepted_curreny_obj.ticker
+        )
+        price = current_price_ticker_obj.get("data").get("ticker").get("low")
+        data = {
+            "price": price,
+            "ticker": accepted_curreny_obj.ticker,
+            "coin": accepted_curreny_obj.title,
+        }
+        return Response(
+            data=data,
             status=status.HTTP_200_OK,
         )
 

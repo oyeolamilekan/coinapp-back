@@ -85,7 +85,7 @@ class BillsType(models.TextChoices):
 
 class AcceptedCrypto(BaseModel):
     title = models.CharField(max_length=300)
-    image = models.ImageField(null=True)
+    image = models.ImageField(null=True, blank=True)
     short_title = models.CharField(max_length=300)
     ticker = models.CharField(max_length=200, null=True, blank=True)
     is_live = models.BooleanField(default=True)
@@ -165,10 +165,62 @@ class BillsRecharge(BaseModel):
         ordering = ("-created",)
 
 
+class POSWithdrawal(BaseModel):
+    desposit_address = models.CharField(max_length=300)
+    expected_amount = models.DecimalField(
+        decimal_places=5,
+        max_digits=20,
+        default=0.00,
+    )
+    blockchain_deposit_status = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        default=BlockChainStatus.PENDING,
+        choices=BlockChainStatus.choices,
+    )
+    is_overpaid = models.BooleanField(default=False)
+    related_currency = models.ForeignKey(
+        AcceptedCrypto,
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    is_abadoned = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False)
+    instant_order_response = models.JSONField(default=dict)
+    instant_order_status = models.CharField(
+        max_length=300,
+        choices=InstantOrderStatus.choices,
+        default=InstantOrderStatus.DONE,
+    )
+    instant_order_id = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        verbose_name_plural = "Withdrawal Request"
+        ordering = ("-created",)
+
+
 class Transaction(BaseModel):
-    bill = models.ForeignKey(BillsRecharge, on_delete=models.CASCADE)
-    recieve_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
-    buying_amount = models.DecimalField(decimal_places=5, default=0.00, max_digits=20)
+    bill = models.ForeignKey(
+        BillsRecharge,
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    pos_withdrawal = models.ForeignKey(
+        POSWithdrawal,
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    recieve_amount = models.DecimalField(
+        decimal_places=5,
+        default=0.00,
+        max_digits=20,
+    )
+    buying_amount = models.DecimalField(
+        decimal_places=5,
+        default=0.00,
+        max_digits=20,
+    )
     instant_order_response = models.JSONField(default=dict)
     bill_payment_response = models.JSONField(default=dict)
     instant_order_status = models.CharField(
@@ -176,10 +228,14 @@ class Transaction(BaseModel):
         choices=InstantOrderStatus.choices,
         default=InstantOrderStatus.DONE,
     )
-    instant_order_id = models.CharField(max_length=300, blank=True)
+    instant_order_id = models.CharField(
+        max_length=300,
+        blank=True,
+    )
     reason = models.CharField(max_length=300, blank=True)
     bill_payment_status = models.CharField(
-        max_length=300, choices=TransactionStatus.choices
+        max_length=300,
+        choices=TransactionStatus.choices,
     )
 
     def __str__(self) -> str:
