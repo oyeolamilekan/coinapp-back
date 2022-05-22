@@ -180,6 +180,7 @@ class POSWithdrawal(BaseModel):
         choices=BlockChainStatus.choices,
     )
     is_overpaid = models.BooleanField(default=False)
+    is_underpaid = models.BooleanField(default=False)
     related_currency = models.ForeignKey(
         AcceptedCrypto,
         on_delete=models.CASCADE,

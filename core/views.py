@@ -96,7 +96,7 @@ class CreateBillAPIView(APIView):
                 "desposit_address": wallet_address,
                 "related_currency": currency_obj,
             }
-
+ 
             bills_recharge = BillsRecharge.objects.create(**data)
 
             bills_recharge.save()
@@ -265,11 +265,22 @@ class ReceiveWebhooks(APIView):
 
                 if recieved_amount < float(bill_recharge_obj.expected_amount):
 
-                    bill_recharge_obj.is_overpaid = True
+                    bill_recharge_obj.is_underpaid = True
 
                     return Response(
                         data={
                             "message": "amount rejected due it being less that expected amount."
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                
+                if recieved_amount > float(bill_recharge_obj.expected_amount):
+
+                    bill_recharge_obj.is_overpaid = True
+
+                    return Response(
+                        data={
+                            "message": "User overpaid for an amount."
                         },
                         status=status.HTTP_200_OK,
                     )
