@@ -278,13 +278,6 @@ class ReceiveWebhooks(APIView):
 
                     bill_recharge_obj.is_overpaid = True
 
-                    return Response(
-                        data={
-                            "message": "User overpaid for an amount."
-                        },
-                        status=status.HTTP_200_OK,
-                    )
-
                 bill_recharge_obj.save()
 
                 instant_order_object = quidax.instant_orders.create_instant_order(
