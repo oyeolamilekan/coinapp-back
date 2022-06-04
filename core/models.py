@@ -43,6 +43,18 @@ class BlockChainStatus(models.TextChoices):
     CONFIRMATION = "CONFIRMATION", _("CONFIRMATION")
 
 
+class BlockChainType(models.TextChoices):
+    """
+    This is the status of a block chain
+    SUCCESSFUL: The transaction has been successful, and accepted by the blockchain
+    REJECTED: The transaction has failed, and rejected by the blockchain
+    PENDING: Transactions has just been initialized
+    CONFIRMATION: Transaction is being confirmed by the blockchain
+    """
+
+    BEP20 = "BEP20", _("BEP20")
+
+
 class InstantOrderStatus(models.TextChoices):
     """
     This choices are denoted the transaction status
@@ -87,6 +99,7 @@ class AcceptedCrypto(BaseModel):
     title = models.CharField(max_length=300)
     image = models.ImageField(null=True, blank=True)
     short_title = models.CharField(max_length=300)
+    is_bep_20 = models.BooleanField(default=False)
     ticker = models.CharField(max_length=200, null=True, blank=True)
     is_live = models.BooleanField(default=True)
 
@@ -162,6 +175,21 @@ class BillsRecharge(BaseModel):
 
     class Meta:
         verbose_name_plural = "Bills Recharge"
+        ordering = ("-created",)
+
+
+class WalletAddress(BaseModel):
+    blockchain_type = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        choices=BlockChainType.choices,
+        default=BlockChainType.BEP20,
+    )
+    desposit_address = models.CharField(max_length=300)
+
+    class Meta:
+        verbose_name_plural = "WalletAddress"
         ordering = ("-created",)
 
 

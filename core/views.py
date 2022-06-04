@@ -168,7 +168,7 @@ class ListAcceptedCryptoAPIView(APIView):
     def get(self, request):
         try:
 
-            accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True)
+            accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True).exclude(is_bep_20=True)
             accepted_crypto_serialized_obj = AcceptedCryptoSerializer(
                 accepted_crypto_object, many=True
             )
@@ -194,6 +194,9 @@ class ReceiveWebhooks(APIView):
                     data={"message": "No be me you run street guy."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            
+            if request.data.get("wallet").get("currency") in ['usdt', 'busd', 'usdc']:
+                pass
 
             if request.data["event"] == "deposit.transaction.confirmation":
 
