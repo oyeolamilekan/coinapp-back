@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction, Network
+from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction, Network, WalletAddress
 
 admin.site.site_header = 'COINAPP ADMIN'
 
@@ -13,6 +13,12 @@ class BillsAdmin(admin.ModelAdmin):
         "slug",
     )
     prepopulated_fields = {"slug": ("title",)}
+
+class WalletAddressAdmin(admin.ModelAdmin):
+    list_display = [
+        "blockchain_type",
+        "desposit_address"
+    ]
 
 
 class NetworkAdmin(admin.ModelAdmin):
@@ -59,3 +65,4 @@ admin.site.register(BillsRecharge, BillsRechargeAdmin)
 admin.site.register(AcceptedCrypto, AcceptedCryptoAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Network, NetworkAdmin)
+admin.site.register(WalletAddress, WalletAddressAdmin)

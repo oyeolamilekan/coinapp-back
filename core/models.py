@@ -194,7 +194,7 @@ class WalletAddress(BaseModel):
 
 
 class POSWithdrawal(BaseModel):
-    desposit_address = models.CharField(max_length=300)
+    desposit_address = models.ForeignKey(WalletAddress, on_delete=models.CASCADE)
     expected_amount = models.DecimalField(
         decimal_places=5,
         max_digits=20,
