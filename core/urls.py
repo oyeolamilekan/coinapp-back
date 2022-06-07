@@ -8,9 +8,15 @@ from .views import (
     ListBillsAPIView,
     ConfirmBillRechargeAPIView,
     FetchCurrentRateAPIView,
+    FetchStableCoinsAPIView,
 )
 
 urlpatterns = [
+    path(
+        "fetch_stablecoins/",
+        FetchStableCoinsAPIView.as_view(),
+        name="fetch_stablecoins",
+    ),
     path(
         "list_networks/",
         ListNetworksAPIView.as_view(),

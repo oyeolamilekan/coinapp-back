@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
+from rest_framework import generics
+
 import traceback
 
 from core.models import (
@@ -343,6 +345,13 @@ class ReceiveWebhooks(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class FetchStableCoinsAPIView(generics.ListAPIView):
+    serializer_class = AcceptedCryptoSerializer
+    model = serializer_class.Meta.model
+    
+    def get_queryset(self):
+        accepted_crypto = AcceptedCrypto.objects.filter(is_bep_20=True)
+        return accepted_crypto
 
 class ConfirmBillRechargeAPIView(APIView):
     def get(self, request, reference):
