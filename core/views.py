@@ -98,7 +98,7 @@ class CreateBillAPIView(APIView):
                 "desposit_address": wallet_address,
                 "related_currency": currency_obj,
             }
- 
+
             bills_recharge = BillsRecharge.objects.create(**data)
 
             bills_recharge.save()
@@ -130,60 +130,41 @@ class CreateBillAPIView(APIView):
             )
 
 
-class ListNetworksAPIView(APIView):
-    def get(self, request):
-        try:
-            network_object = Network.objects.all()
-            network_object_serialized_obj = NetworkSerializer(network_object, many=True)
-            return Response(
-                data=network_object_serialized_obj.data,
-                status=status.HTTP_200_OK,
-            )
-        except:
-            traceback.print_exc()
-            return Response(
-                data={"message": "error in fetching networks"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+class FetchStableCoinsAPIView(generics.ListAPIView):
+    serializer_class = AcceptedCryptoSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        accepted_crypto = AcceptedCrypto.objects.filter(is_bep_20=True)
+        return accepted_crypto
 
 
-class ListBillsAPIView(APIView):
-    def get(self, request, bill_type):
-        try:
-            bills_object = Bills.objects.filter(network__slug=bill_type).order_by(
-                "amount"
-            )
-            bills_object_serialized_obj = BillsSerializer(bills_object, many=True)
-            return Response(
-                data=bills_object_serialized_obj.data,
-                status=status.HTTP_200_OK,
-            )
-        except:
-            traceback.print_exc()
-            return Response(
-                data={"message": "error in fetching networks"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+class ListNetworksAPIView(generics.ListAPIView):
+    serializer_class = NetworkSerializer
+    model = serializer_class.Meta.model
+    queryset = Network.objects.all()
+
+
+class ListBillsAPIView(generics.ListAPIView):
+    serializer_class = BillsSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        bill_type = self.kwargs["bill_type"]
+        bills_object = Bills.objects.filter(network__slug=bill_type).order_by("amount")
+        return bills_object
 
 
 class ListAcceptedCryptoAPIView(APIView):
-    def get(self, request):
-        try:
+    serializer_class = AcceptedCryptoSerializer
+    model = serializer_class.Meta.model
 
-            accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True).exclude(is_bep_20=True)
-            accepted_crypto_serialized_obj = AcceptedCryptoSerializer(
-                accepted_crypto_object, many=True
-            )
-            return Response(
-                data=accepted_crypto_serialized_obj.data,
-                status=status.HTTP_200_OK,
-            )
-        except:
-            traceback.print_exc()
-            return Response(
-                data={"message": "error in fetching accepted cryptos"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+    def get_queryset(self):
+        accepted_crypto_object = AcceptedCrypto.objects.filter(is_live=True).exclude(
+            is_bep_20=True
+        )
+
+        return accepted_crypto_object
 
 
 class ReceiveWebhooks(APIView):
@@ -196,8 +177,8 @@ class ReceiveWebhooks(APIView):
                     data={"message": "No be me you run street guy."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            
-            if request.data.get("wallet").get("currency") in ['usdt', 'busd', 'usdc']:
+
+            if request.data.get("wallet", {}).get("currency") in ["usdt", "busd", "usdc"]:
                 pass
 
             if request.data["event"] == "deposit.transaction.confirmation":
@@ -278,7 +259,7 @@ class ReceiveWebhooks(APIView):
                         },
                         status=status.HTTP_200_OK,
                     )
-                
+
                 if recieved_amount > float(bill_recharge_obj.expected_amount):
 
                     bill_recharge_obj.is_overpaid = True
@@ -345,13 +326,6 @@ class ReceiveWebhooks(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-class FetchStableCoinsAPIView(generics.ListAPIView):
-    serializer_class = AcceptedCryptoSerializer
-    model = serializer_class.Meta.model
-    
-    def get_queryset(self):
-        accepted_crypto = AcceptedCrypto.objects.filter(is_bep_20=True)
-        return accepted_crypto
 
 class ConfirmBillRechargeAPIView(APIView):
     def get(self, request, reference):
