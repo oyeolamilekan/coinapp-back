@@ -155,7 +155,7 @@ class ListBillsAPIView(generics.ListAPIView):
         return bills_object
 
 
-class ListAcceptedCryptoAPIView(APIView):
+class ListAcceptedCryptoAPIView(generics.ListAPIView):
     serializer_class = AcceptedCryptoSerializer
     model = serializer_class.Meta.model
 
