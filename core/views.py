@@ -19,11 +19,13 @@ from core.models import (
     Network,
     Transaction,
     TransactionStatus,
+    WalletAddress,
 )
 from core.serializers import (
     AcceptedCryptoSerializer,
     BillsSerializer,
     NetworkSerializer,
+    WalletAddressSerializer,
 )
 
 
@@ -165,6 +167,13 @@ class ListAcceptedCryptoAPIView(generics.ListAPIView):
         )
 
         return accepted_crypto_object
+
+class FetchBEP20WalletAddress(APIView):
+
+    def get(self, request):
+        fetch_single_walletaddress = WalletAddress.objects.all().order_by("?")[0]
+        fetch_single_walletaddress_object = WalletAddressSerializer(fetch_single_walletaddress)
+        return Response(data=fetch_single_walletaddress_object.data, status=status.HTTP_200_OK)
 
 
 class ReceiveWebhooks(APIView):
@@ -368,3 +377,17 @@ def not_found(request, exception, *args, **kwargs):
     """
     data = {"error": "Not found (404)"}
     return JsonResponse(data, status=status.HTTP_400_BAD_REQUEST)
+
+def server_error(request, *args, **argv):
+    """
+    Generic 400 error handler.
+    """
+    data = {"error": "Sever error."}
+    return JsonResponse(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def timeout_error(request, exception, *args, **kwargs):
+    """
+    Generic 400 error handler.
+    """
+    data = {"error": "Server timeout error."}
+    return JsonResponse(data, status=status.HTTP_504_GATEWAY_TIMEOUT)

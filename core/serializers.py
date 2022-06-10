@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AcceptedCrypto, Bills, Network
+from .models import AcceptedCrypto, Bills, Network, WalletAddress
 
 from rest_framework.fields import SerializerMethodField
 
@@ -14,6 +14,10 @@ class NetworkSerializer(serializers.ModelSerializer):
         model = Network
         fields = ("title", "image", "slug")
 
+class WalletAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WalletAddress
+        fields = ("blockchain_type", "desposit_address")
 
 class BillsSerializer(serializers.ModelSerializer):
 

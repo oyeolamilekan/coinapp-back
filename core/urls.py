@@ -9,6 +9,7 @@ from .views import (
     ConfirmBillRechargeAPIView,
     FetchCurrentRateAPIView,
     FetchStableCoinsAPIView,
+    FetchBEP20WalletAddress,
 )
 
 urlpatterns = [
@@ -16,6 +17,11 @@ urlpatterns = [
         "fetch_stablecoins/",
         FetchStableCoinsAPIView.as_view(),
         name="fetch_stablecoins",
+    ),
+    path(
+        "fetch_bep20_wallet_address/",
+        FetchBEP20WalletAddress.as_view(),
+        name="fetch_bep20_wallet_address",
     ),
     path(
         "list_networks/",
