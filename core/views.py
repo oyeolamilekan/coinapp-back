@@ -200,6 +200,10 @@ class ReceiveWebhooks(APIView):
                 .get("address", None)
             )
 
+            print(currency)
+
+            print(wallet_address)
+
             if currency in ["usdt", "busd", "usdc"]:
 
                 if request.data["event"] == "deposit.transaction.confirmation":
