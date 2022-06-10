@@ -194,6 +194,12 @@ class ReceiveWebhooks(APIView):
 
             currency = request.data.get("data", {}).get("wallet", {}).get("currency")
 
+            wallet_address = (
+                request.data.get("data", {})
+                .get("payment_address", {})
+                .get("address", None)
+            )
+
             if currency in ["usdt", "busd", "usdc"]:
 
                 if request.data["event"] == "deposit.transaction.confirmation":
@@ -205,10 +211,6 @@ class ReceiveWebhooks(APIView):
             if BillsRecharge.objects.filter(desposit_address=wallet_address).exists():
 
                 if request.data["event"] == "deposit.transaction.confirmation":
-
-                    wallet_address = (
-                        request.data.get("data").get("payment_address").get("address")
-                    )
 
                     bill_recharge_obj = BillsRecharge.objects.get(
                         desposit_address=wallet_address
