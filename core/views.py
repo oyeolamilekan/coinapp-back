@@ -168,12 +168,17 @@ class ListAcceptedCryptoAPIView(generics.ListAPIView):
 
         return accepted_crypto_object
 
-class FetchBEP20WalletAddress(APIView):
 
+class FetchBEP20WalletAddress(APIView):
     def get(self, request):
         fetch_single_walletaddress = WalletAddress.objects.all().order_by("?")[0]
-        fetch_single_walletaddress_object = WalletAddressSerializer(fetch_single_walletaddress)
-        return Response(data=fetch_single_walletaddress_object.data, status=status.HTTP_200_OK)
+        fetch_single_walletaddress_object = WalletAddressSerializer(
+            fetch_single_walletaddress
+        )
+        return Response(
+            data=fetch_single_walletaddress_object.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class ReceiveWebhooks(APIView):
@@ -187,7 +192,11 @@ class ReceiveWebhooks(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            if request.data.get("wallet", {}).get("currency") in ["usdt", "busd", "usdc"]:
+            if request.data.get("wallet", {}).get("currency") in [
+                "usdt",
+                "busd",
+                "usdc",
+            ]:
                 pass
 
             if request.data["event"] == "deposit.transaction.confirmation":
@@ -378,12 +387,14 @@ def not_found(request, exception, *args, **kwargs):
     data = {"error": "Not found (404)"}
     return JsonResponse(data, status=status.HTTP_400_BAD_REQUEST)
 
+
 def server_error(request, *args, **argv):
     """
     Generic 400 error handler.
     """
     data = {"error": "Sever error."}
     return JsonResponse(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 def timeout_error(request, exception, *args, **kwargs):
     """
