@@ -192,7 +192,7 @@ class ReceiveWebhooks(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            if request.data.get("wallet", {}).get("currency") in [
+            if request.data.get("data", {}).get("wallet", {}).get("currency") in [
                 "usdt",
                 "busd",
                 "usdc",
