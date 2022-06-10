@@ -200,9 +200,9 @@ class ReceiveWebhooks(APIView):
                 .get("address", None)
             )
 
-            print(currency)
+            print(f"{currency} {request.data['event']}")
 
-            print(wallet_address)
+            print(f"{wallet_address} {request.data['event']}")
 
             if currency in ["usdt", "busd", "usdc"]:
 
