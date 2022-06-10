@@ -197,7 +197,11 @@ class ReceiveWebhooks(APIView):
                 "busd",
                 "usdc",
             ]:
-                pass
+                if request.data["event"] == "deposit.transaction.confirmation":
+                    print("usdt transaction confirmation")
+                
+                if request.data["event"] == "deposit.successful":
+                    print("usdt transaction confirmed")
 
             if request.data["event"] == "deposit.transaction.confirmation":
 
