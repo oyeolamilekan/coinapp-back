@@ -1,10 +1,19 @@
 from django.contrib import admin
 
-from core.models import AcceptedCrypto, Bills, BillsRecharge, Transaction, Network, WalletAddress
+from core.models import (
+    AcceptedCrypto,
+    Bills,
+    BillsRecharge,
+    Transaction,
+    Network,
+    WalletAddress,
+    POSWithdrawal,
+)
 
-admin.site.site_header = 'COINAPP ADMIN'
+admin.site.site_header = "COINAPP ADMIN"
 
-admin.site.site_title = 'COINAPP'
+admin.site.site_title = "COINAPP"
+
 
 class BillsAdmin(admin.ModelAdmin):
     list_display = (
@@ -14,11 +23,9 @@ class BillsAdmin(admin.ModelAdmin):
     )
     prepopulated_fields = {"slug": ("title",)}
 
+
 class WalletAddressAdmin(admin.ModelAdmin):
-    list_display = [
-        "blockchain_type",
-        "desposit_address"
-    ]
+    list_display = ["blockchain_type", "desposit_address"]
 
 
 class NetworkAdmin(admin.ModelAdmin):
@@ -60,6 +67,21 @@ class BillsRechargeAdmin(admin.ModelAdmin):
     )
 
 
+class POSWithdrawalAdmin(admin.ModelAdmin):
+    list_display = (
+        "reference_id",
+        "desposit_address",
+        "expected_amount",
+        "blockchain_deposit_status",
+        "is_overpaid",
+        "is_underpaid",
+        "related_currency",
+        "is_abadoned",
+        "is_paid",
+    )
+
+
+admin.site.register(POSWithdrawal, POSWithdrawalAdmin)
 admin.site.register(Bills, BillsAdmin)
 admin.site.register(BillsRecharge, BillsRechargeAdmin)
 admin.site.register(AcceptedCrypto, AcceptedCryptoAdmin)

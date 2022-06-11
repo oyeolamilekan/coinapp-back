@@ -17,6 +17,7 @@ from core.models import (
     BlockChainStatus,
     InstantOrderStatus,
     Network,
+    POSWithdrawal,
     Transaction,
     TransactionStatus,
     WalletAddress,
@@ -169,16 +170,37 @@ class ListAcceptedCryptoAPIView(generics.ListAPIView):
         return accepted_crypto_object
 
 
-class FetchBEP20WalletAddress(APIView):
-    def get(self, request):
-        fetch_single_walletaddress = WalletAddress.objects.all().order_by("?")[0]
-        fetch_single_walletaddress_object = WalletAddressSerializer(
-            fetch_single_walletaddress
-        )
+class InitateTransaction(APIView):
+    def post(self, request):
+        amount = request.data.get('amount')
+        related_currency = request.data.get('refrence_currency')
+        if all([amount, related_currency]) and related_currency in ['busd', 'usdt', 'usdc']:
+            accepted_crypto_obj = AcceptedCrypto.objects.get(short_title=related_currency)
+            fetch_single_wallet_address = WalletAddress.objects.all().order_by("?")[0]
+            reference_id = f"COIN-APP-{get_random_string(length=20)}"
+            data = {
+                "desposit_address": fetch_single_wallet_address,
+                "expected_amount": float(amount),
+                "related_currency": accepted_crypto_obj,
+                "reference_id": reference_id
+            }
+            pos_withdrawal_obj = POSWithdrawal.objects.create(**data)
+            pos_withdrawal_obj.save()
+
+            return Response(
+                data={
+                    "wallet_address": pos_withdrawal_obj.desposit_address.desposit_address,
+                    "reference_id": pos_withdrawal_obj.reference_id
+                },
+                status=status.HTTP_200_OK,
+            )
+
         return Response(
-            data=fetch_single_walletaddress_object.data,
-            status=status.HTTP_200_OK,
-        )
+                data={
+                    "error": "Kindly check the input"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ReceiveWebhooks(APIView):
@@ -199,10 +221,6 @@ class ReceiveWebhooks(APIView):
                 .get("payment_address", {})
                 .get("address", None)
             )
-
-            print(f"{currency} {request.data['event']}")
-
-            print(f"{wallet_address} {request.data['event']}")
 
             if currency in ["usdt", "busd", "usdc"]:
 
