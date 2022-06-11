@@ -261,11 +261,11 @@ class ReceiveWebhooks(APIView):
 
                         if recieved_amount > float(pos_withdrawal_obj.expected_amount):
 
-                            bill_recharge_obj.is_overpaid = True
+                            pos_withdrawal_obj.is_overpaid = True
                         
                         if recieved_amount < float(pos_withdrawal_obj.expected_amount):
 
-                            bill_recharge_obj.is_underpaid = True
+                            pos_withdrawal_obj.is_underpaid = True
 
                         pos_withdrawal_obj.save()
 
