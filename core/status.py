@@ -8,6 +8,9 @@ class RecievingCurrenciesStatus(models.TextChoices):
     LITECOIN = "LTC", _("LTC")
     DASH = "DASH", _("DASH")
 
+class RelatedToStatus(models.TextChoices):
+    BILL_PAYMENT = "BILL_PAYMENT", _("BILL_PAYMENT")
+    POS_WITHDRAWAL = "POS_WITHDRAWAL", _("POS_WITHDRAWAL")
 
 class CurrencyType(models.TextChoices):
     DOLLARS = "DOLLARS", _("DOLLARS")

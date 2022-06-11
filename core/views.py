@@ -242,7 +242,7 @@ class ReceiveWebhooks(APIView):
                         pos_withdrawal_obj.save()
 
                         return Response(
-                            data={"message": "deposit confirmed"},
+                            data={"message": "confirming deposit"},
                             status=status.HTTP_200_OK,
                         )
 

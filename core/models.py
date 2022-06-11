@@ -10,6 +10,7 @@ from core.status import (
     CurrencyType,
     InstantOrderStatus,
     TransactionStatus,
+    RelatedToStatus,
 )
 
 
@@ -168,6 +169,11 @@ class Transaction(BaseModel):
         POSWithdrawal,
         on_delete=models.CASCADE,
         null=True,
+    )
+    related_to = models.CharField(
+        max_length=300,
+        choices=RelatedToStatus.choices,
+        default=RelatedToStatus.BILL_PAYMENT,
     )
     recieve_amount = models.DecimalField(
         decimal_places=5,
