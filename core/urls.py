@@ -1,15 +1,16 @@
 from django.urls import path
 
 from .views import (
-    ReceiveWebhooks,
-    CreateBillAPIView,
-    ListAcceptedCryptoAPIView,
-    ListNetworksAPIView,
-    ListBillsAPIView,
     ConfirmBillRechargeAPIView,
+    ConfirmStableCoinDeposit,
+    CreateBillAPIView,
     FetchCurrentRateAPIView,
     FetchStableCoinsAPIView,
     InitateTransaction,
+    ListAcceptedCryptoAPIView,
+    ListBillsAPIView,
+    ListNetworksAPIView,
+    ReceiveWebhooks,
 )
 
 urlpatterns = [
@@ -17,6 +18,11 @@ urlpatterns = [
         "fetch_stablecoins/",
         FetchStableCoinsAPIView.as_view(),
         name="fetch_stablecoins",
+    ),
+    path(
+        "confirm_stablecoin_deposit/<slug:reference>/",
+        ConfirmStableCoinDeposit.as_view(),
+        name="confirm_stablecoin_deposit",
     ),
     path(
         "initate_transaction/",
