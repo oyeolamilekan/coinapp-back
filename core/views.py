@@ -441,7 +441,7 @@ class ConfirmBillRechargeAPIView(APIView):
 
 class ConfirmStableCoinDeposit(APIView):
     def get(self, request, reference):
-        pos_withdrawal_obj = POSWithdrawal.objects.get(reference=reference)
+        pos_withdrawal_obj = POSWithdrawal.objects.get(reference_id=reference)
         return Response(
             data={
                 "status": pos_withdrawal_obj.blockchain_deposit_status,
