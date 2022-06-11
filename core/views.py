@@ -26,7 +26,6 @@ from core.serializers import (
     AcceptedCryptoSerializer,
     BillsSerializer,
     NetworkSerializer,
-    WalletAddressSerializer,
 )
 
 
@@ -172,17 +171,23 @@ class ListAcceptedCryptoAPIView(generics.ListAPIView):
 
 class InitateTransaction(APIView):
     def post(self, request):
-        amount = request.data.get('amount')
-        related_currency = request.data.get('refrence_currency')
-        if all([amount, related_currency]) and related_currency in ['busd', 'usdt', 'usdc']:
-            accepted_crypto_obj = AcceptedCrypto.objects.get(short_title=related_currency)
+        amount = request.data.get("amount")
+        related_currency = request.data.get("refrence_currency")
+        if all([amount, related_currency]) and related_currency in [
+            "busd",
+            "usdt",
+            "usdc",
+        ]:
+            accepted_crypto_obj = AcceptedCrypto.objects.get(
+                short_title=related_currency
+            )
             fetch_single_wallet_address = WalletAddress.objects.all().order_by("?")[0]
             reference_id = f"COIN-APP-{get_random_string(length=20)}"
             data = {
                 "desposit_address": fetch_single_wallet_address,
                 "expected_amount": float(amount),
                 "related_currency": accepted_crypto_obj,
-                "reference_id": reference_id
+                "reference_id": reference_id,
             }
             pos_withdrawal_obj = POSWithdrawal.objects.create(**data)
             pos_withdrawal_obj.save()
@@ -190,23 +195,23 @@ class InitateTransaction(APIView):
             return Response(
                 data={
                     "wallet_address": pos_withdrawal_obj.desposit_address.desposit_address,
-                    "reference_id": pos_withdrawal_obj.reference_id
+                    "reference_id": pos_withdrawal_obj.reference_id,
                 },
                 status=status.HTTP_200_OK,
             )
 
         return Response(
-                data={
-                    "error": "Kindly check the input"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            data={"error": "Kindly check the input"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class ReceiveWebhooks(APIView):
     def post(self, request):
         try:
             quidax_secret = request.META.get("HTTP_QUIDAX_SIGNATURE", None)
+
+            event = request.data["event"]
 
             if quidax_secret != settings.WEBHOOK_SECRET:
                 return Response(
@@ -224,144 +229,179 @@ class ReceiveWebhooks(APIView):
 
             if currency in ["usdt", "busd", "usdc"]:
 
-                if request.data["event"] == "deposit.transaction.confirmation":
-                    print(f"{currency} transaction confirmation")
+                match event:
+                    case "deposit.transaction.confirmation":
+                        pos_withdrawal_obj = POSWithdrawal.objects.get(
+                            desposit_address__desposit_address=wallet_address
+                        )
 
-                if request.data["event"] == "deposit.successful":
-                    print(f"{currency} transaction confirmed")
+                        pos_withdrawal_obj.blockchain_deposit_status = (
+                            BlockChainStatus.CONFIRMATION
+                        )
 
-            if BillsRecharge.objects.filter(desposit_address=wallet_address).exists():
-
-                if request.data["event"] == "deposit.transaction.confirmation":
-
-                    bill_recharge_obj = BillsRecharge.objects.get(
-                        desposit_address=wallet_address
-                    )
-
-                    bill_recharge_obj.blockchain_deposit_status = (
-                        BlockChainStatus.CONFIRMATION
-                    )
-
-                    bill_recharge_obj.save()
-
-                    return Response(
-                        data={"message": "deposit confirmed"},
-                        status=status.HTTP_200_OK,
-                    )
-
-                if request.data["event"] == "instant_order.cancelled":
-                    instant_order_id = request.data.get("data").get("id")
-
-                    transaction_obj = Transaction.objects.get(
-                        instant_order_id=instant_order_id
-                    )
-
-                    transaction_obj.instant_order_status = InstantOrderStatus.CANCELLED
-
-                    transaction_obj.save()
-
-                    return Response(
-                        data={"message": "order cancelled"},
-                        status=status.HTTP_200_OK,
-                    )
-
-                if request.data["event"] == "instant_order.done":
-                    instant_order_id = request.data.get("data").get("id")
-
-                    transaction_obj = Transaction.objects.get(
-                        instant_order_id=instant_order_id
-                    )
-
-                    transaction_obj.instant_order_status = InstantOrderStatus.DONE
-
-                    transaction_obj.save()
-
-                    return Response(
-                        data={"message": "order done and successfully fufilled."},
-                        status=status.HTTP_200_OK,
-                    )
-
-                if request.data["event"] == "deposit.successful":
-                    recieved_amount = float(request.data.get("data").get("amount"))
-
-                    wallet_address = (
-                        request.data.get("data").get("payment_address").get("address")
-                    )
-
-                    bill_recharge_obj = BillsRecharge.objects.get(
-                        desposit_address=wallet_address
-                    )
-
-                    bill_recharge_obj.blockchain_deposit_status = (
-                        BlockChainStatus.SUCCESSFUL
-                    )
-
-                    if recieved_amount < float(bill_recharge_obj.expected_amount):
-
-                        bill_recharge_obj.is_underpaid = True
+                        pos_withdrawal_obj.save()
 
                         return Response(
-                            data={
-                                "message": "amount rejected due it being less that expected amount."
-                            },
+                            data={"message": "deposit confirmed"},
                             status=status.HTTP_200_OK,
                         )
 
-                    if recieved_amount > float(bill_recharge_obj.expected_amount):
-
-                        bill_recharge_obj.is_overpaid = True
-
-                    bill_recharge_obj.save()
-
-                    instant_order_object = quidax.instant_orders.create_instant_order(
-                        "me",
-                        bid="ngn",
-                        ask=bill_recharge_obj.related_currency.short_title.lower(),
-                        type="sell",
-                        volume=float(bill_recharge_obj.expected_amount),
-                        unit=bill_recharge_obj.related_currency.short_title.lower(),
-                    )
-
-                    instant_order_object_id = instant_order_object.get("data").get("id")
-
-                    confirm_instant_object = (
-                        quidax.instant_orders.confirm_instant_orders(
-                            "me",
-                            instant_order_object_id,
+                    case "deposit.successful":
+                        pos_withdrawal_obj = POSWithdrawal.objects.get(
+                            desposit_address__desposit_address=wallet_address
                         )
-                    )
 
-                    bill_recharge_obj.is_paid = True
+                        pos_withdrawal_obj.blockchain_deposit_status = (
+                            BlockChainStatus.SUCCESSFUL
+                        )
 
-                    bill_recharge_obj.save()
+                        pos_withdrawal_obj.save()
 
-                    total_amount = (
-                        confirm_instant_object.get("data").get("receive").get("amount")
-                    )
+                        return Response(
+                            data={"message": "deposit confirmed"},
+                            status=status.HTTP_200_OK,
+                        )
 
-                    response = bill.buy_airtime(
-                        bill_recharge_obj.recieving_id,
-                        float(bill_recharge_obj.bills_type.amount),
-                    )
+            if BillsRecharge.objects.filter(desposit_address=wallet_address).exists():
 
-                    bill_amount = float(bill_recharge_obj.bills_type.amount)
+                match event:
+                    case "deposit.transaction.confirmation":
+                        bill_recharge_obj = BillsRecharge.objects.get(
+                            desposit_address=wallet_address
+                        )
 
-                    buying_amount = bill_amount - (bill_amount * 0.03)
+                        bill_recharge_obj.blockchain_deposit_status = (
+                            BlockChainStatus.CONFIRMATION
+                        )
 
-                    data = {
-                        "bill": bill_recharge_obj,
-                        "recieve_amount": total_amount,
-                        "buying_amount": buying_amount,
-                        "instant_order_response": confirm_instant_object,
-                        "bill_payment_response": response,
-                        "instant_order_id": instant_order_object_id,
-                        "bill_payment_status": TransactionStatus.SUCCESS,
-                        "instant_order_status": InstantOrderStatus.CONFIRM,
-                    }
+                        bill_recharge_obj.save()
 
-                    transaction_obj = Transaction.objects.create(**data)
+                        return Response(
+                            data={"message": "deposit confirmed"},
+                            status=status.HTTP_200_OK,
+                        )
 
-                    transaction_obj.save()
+                    case "deposit.successful":
+                        recieved_amount = float(request.data.get("data").get("amount"))
+
+                        wallet_address = (
+                            request.data.get("data")
+                            .get("payment_address")
+                            .get("address")
+                        )
+
+                        bill_recharge_obj = BillsRecharge.objects.get(
+                            desposit_address=wallet_address
+                        )
+
+                        bill_recharge_obj.blockchain_deposit_status = (
+                            BlockChainStatus.SUCCESSFUL
+                        )
+
+                        if recieved_amount < float(bill_recharge_obj.expected_amount):
+
+                            bill_recharge_obj.is_underpaid = True
+
+                            return Response(
+                                data={
+                                    "message": "amount rejected due it being less that expected amount."
+                                },
+                                status=status.HTTP_200_OK,
+                            )
+
+                        if recieved_amount > float(bill_recharge_obj.expected_amount):
+
+                            bill_recharge_obj.is_overpaid = True
+
+                        bill_recharge_obj.save()
+
+                        instant_order_object = quidax.instant_orders.create_instant_order(
+                            "me",
+                            bid="ngn",
+                            ask=bill_recharge_obj.related_currency.short_title.lower(),
+                            type="sell",
+                            volume=float(bill_recharge_obj.expected_amount),
+                            unit=bill_recharge_obj.related_currency.short_title.lower(),
+                        )
+
+                        instant_order_object_id = instant_order_object.get("data").get(
+                            "id"
+                        )
+
+                        confirm_instant_object = (
+                            quidax.instant_orders.confirm_instant_orders(
+                                "me",
+                                instant_order_object_id,
+                            )
+                        )
+
+                        bill_recharge_obj.is_paid = True
+
+                        bill_recharge_obj.save()
+
+                        total_amount = (
+                            confirm_instant_object.get("data")
+                            .get("receive")
+                            .get("amount")
+                        )
+
+                        response = bill.buy_airtime(
+                            bill_recharge_obj.recieving_id,
+                            float(bill_recharge_obj.bills_type.amount),
+                        )
+
+                        bill_amount = float(bill_recharge_obj.bills_type.amount)
+
+                        buying_amount = bill_amount - (bill_amount * 0.03)
+
+                        data = {
+                            "bill": bill_recharge_obj,
+                            "recieve_amount": total_amount,
+                            "buying_amount": buying_amount,
+                            "instant_order_response": confirm_instant_object,
+                            "bill_payment_response": response,
+                            "instant_order_id": instant_order_object_id,
+                            "bill_payment_status": TransactionStatus.SUCCESS,
+                            "instant_order_status": InstantOrderStatus.CONFIRM,
+                        }
+
+                        transaction_obj = Transaction.objects.create(**data)
+
+                        transaction_obj.save()
+
+                    case "instant_order.cancelled":
+                        instant_order_id = request.data.get("data").get("id")
+
+                        transaction_obj = Transaction.objects.get(
+                            instant_order_id=instant_order_id
+                        )
+
+                        transaction_obj.instant_order_status = (
+                            InstantOrderStatus.CANCELLED
+                        )
+
+                        transaction_obj.save()
+
+                        return Response(
+                            data={"message": "order cancelled"},
+                            status=status.HTTP_200_OK,
+                        )
+
+                    case "instant_order.done":
+                        instant_order_id = request.data.get("data").get("id")
+
+                        transaction_obj = Transaction.objects.get(
+                            instant_order_id=instant_order_id
+                        )
+
+                        transaction_obj.instant_order_status = InstantOrderStatus.DONE
+
+                        transaction_obj.save()
+
+                        return Response(
+                            data={"message": "order done and successfully fufilled."},
+                            status=status.HTTP_200_OK,
+                        )
 
             return Response(
                 data={"message": "successfully recieved payments."},
