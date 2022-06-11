@@ -213,6 +213,8 @@ class ReceiveWebhooks(APIView):
 
             event = request.data["event"]
 
+            recieved_amount = float(request.data.get("data").get("amount"))
+
             if quidax_secret != settings.WEBHOOK_SECRET:
                 return Response(
                     data={"message": "No be me you run street guy."},
@@ -255,6 +257,16 @@ class ReceiveWebhooks(APIView):
                             BlockChainStatus.SUCCESSFUL
                         )
 
+                        pos_withdrawal_obj.is_paid = True
+
+                        if recieved_amount > float(pos_withdrawal_obj.expected_amount):
+
+                            bill_recharge_obj.is_overpaid = True
+                        
+                        if recieved_amount < float(pos_withdrawal_obj.expected_amount):
+
+                            bill_recharge_obj.is_underpaid = True
+
                         pos_withdrawal_obj.save()
 
                         return Response(
@@ -282,7 +294,6 @@ class ReceiveWebhooks(APIView):
                         )
 
                     case "deposit.successful":
-                        recieved_amount = float(request.data.get("data").get("amount"))
 
                         wallet_address = (
                             request.data.get("data")
