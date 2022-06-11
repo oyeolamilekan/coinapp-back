@@ -8,6 +8,7 @@ from core.models import (
     Network,
     WalletAddress,
     POSWithdrawal,
+    POSTransaction,
 )
 
 admin.site.site_header = "COINAPP ADMIN"
@@ -80,7 +81,17 @@ class POSWithdrawalAdmin(admin.ModelAdmin):
         "is_paid",
     )
 
+class POSTransactionlAdmin(admin.ModelAdmin):
+    list_display = (
+        "pos_withdrawal",
+        "is_overpaid",
+        "is_paid",
+        "is_overpaid",
+        "amount",
+        "currency",
+    )
 
+admin.site.register(POSTransaction, POSTransactionlAdmin)
 admin.site.register(POSWithdrawal, POSWithdrawalAdmin)
 admin.site.register(Bills, BillsAdmin)
 admin.site.register(BillsRecharge, BillsRechargeAdmin)

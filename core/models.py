@@ -155,18 +155,45 @@ class POSWithdrawal(BaseModel):
     instant_order_id = models.CharField(max_length=300, blank=True)
 
     class Meta:
-        verbose_name_plural = "Withdrawal Request"
+        verbose_name_plural = "POSWithdrawal Request"
+        ordering = ("-created",)
+
+class POSTransaction(BaseModel):
+    pos_withdrawal = models.ForeignKey(
+        POSWithdrawal,
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+    @property
+    def is_overpaid(cls):
+        return cls.pos_withdrawal.is_overpaid
+    
+    @property
+    def is_paid(cls):
+        return cls.pos_withdrawal.is_paid
+
+
+    @property
+    def is_overpaid(cls):
+        return cls.pos_withdrawal.is_overpaid
+
+    @property
+    def amount(cls):
+        return cls.pos_withdrawal.expected_amount
+
+    @property
+    def currency(cls):
+        return cls.pos_withdrawal.related_currency.short_title
+
+    class Meta:
+        verbose_name_plural = "POSTransaction Request"
         ordering = ("-created",)
 
 
 class Transaction(BaseModel):
     bill = models.ForeignKey(
         BillsRecharge,
-        on_delete=models.CASCADE,
-        null=True,
-    )
-    pos_withdrawal = models.ForeignKey(
-        POSWithdrawal,
         on_delete=models.CASCADE,
         null=True,
     )

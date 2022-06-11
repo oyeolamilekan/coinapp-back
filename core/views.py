@@ -16,6 +16,7 @@ from core.models import (
     BlockChainStatus,
     InstantOrderStatus,
     Network,
+    POSTransaction,
     POSWithdrawal,
     Transaction,
     TransactionStatus,
@@ -269,6 +270,10 @@ class ReceiveWebhooks(APIView):
                         pos_withdrawal_obj.is_paid = True
 
                         pos_withdrawal_obj.save()
+
+                        transaction_obj = POSTransaction.objects.create(pos_withdrawal=pos_withdrawal_obj)
+
+                        transaction_obj.save()
 
                         return Response(
                             data={"message": "deposit confirmed"},
