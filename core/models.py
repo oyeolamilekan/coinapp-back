@@ -187,8 +187,11 @@ class POSTransaction(BaseModel):
         return cls.pos_withdrawal.related_currency.short_title
 
     class Meta:
-        verbose_name_plural = "POSTransaction Request"
+        verbose_name_plural = "POSTransaction"
         ordering = ("-created",)
+
+    def __str__(self) -> str:
+        return f"{self.pos_withdrawal.reference_id}"
 
 
 class Transaction(BaseModel):
