@@ -155,7 +155,7 @@ class POSWithdrawal(BaseModel):
     instant_order_id = models.CharField(max_length=300, blank=True)
 
     class Meta:
-        verbose_name_plural = "POSWithdrawal Request"
+        verbose_name_plural = "POSWithdrawal"
         ordering = ("-created",)
 
 class POSTransaction(BaseModel):
@@ -172,7 +172,10 @@ class POSTransaction(BaseModel):
     @property
     def is_paid(cls):
         return cls.pos_withdrawal.is_paid
-
+    
+    @property
+    def reference_id(cls):
+        return cls.pos_withdrawal.reference_id
 
     @property
     def is_overpaid(cls):

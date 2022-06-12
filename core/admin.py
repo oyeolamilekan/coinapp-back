@@ -83,7 +83,7 @@ class POSWithdrawalAdmin(admin.ModelAdmin):
 
 class POSTransactionlAdmin(admin.ModelAdmin):
     list_display = (
-        "pos_withdrawal",
+        "reference_id",
         "is_overpaid",
         "is_paid",
         "is_overpaid",
