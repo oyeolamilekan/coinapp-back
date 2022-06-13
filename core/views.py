@@ -213,6 +213,8 @@ class ReceiveWebhooks(APIView):
 
             event = request.data["event"]
 
+            print(event)
+
             recieved_amount = float(request.data.get("data").get("amount"))
 
             if quidax_secret != settings.WEBHOOK_SECRET:
