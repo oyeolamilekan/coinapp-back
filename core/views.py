@@ -213,10 +213,6 @@ class ReceiveWebhooks(APIView):
 
             event = request.data["event"]
 
-            print(event)
-
-            recieved_amount = float(request.data.get("data").get("amount"))
-
             if quidax_secret != settings.WEBHOOK_SECRET:
                 return Response(
                     data={"message": "No be me you run street guy."},
@@ -251,6 +247,8 @@ class ReceiveWebhooks(APIView):
                         )
 
                     case "deposit.successful":
+                        recieved_amount = float(request.data.get("data").get("amount"))
+
                         pos_withdrawal_obj = POSWithdrawal.objects.get(
                             desposit_address__desposit_address=wallet_address
                         )
@@ -283,6 +281,7 @@ class ReceiveWebhooks(APIView):
                         )
 
             if BillsRecharge.objects.filter(desposit_address=wallet_address).exists():
+                recieved_amount = float(request.data.get("data").get("amount"))
 
                 match event:
                     case "deposit.transaction.confirmation":
