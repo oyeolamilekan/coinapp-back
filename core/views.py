@@ -451,6 +451,7 @@ class ConfirmStableCoinDeposit(APIView):
         return Response(
             data={
                 "status": pos_withdrawal_obj.blockchain_deposit_status,
+                "coin_type": pos_withdrawal_obj.related_currency.short_title,
                 "is_overpaid": pos_withdrawal_obj.is_overpaid,
                 "is_underpaid": pos_withdrawal_obj.is_underpaid,
             },
