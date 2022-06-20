@@ -109,7 +109,7 @@ class CreateBillAPIView(APIView):
                 data={
                     "status": "success",
                     "address": bills_recharge.desposit_address,
-                    "blockchain": currency_obj.title,
+                    "blockchain": currency_obj.title.upper(),
                     "amount": bills_recharge.expected_amount,
                     "message": f"kindly deposit {bills_recharge.expected_amount} to {bills_recharge.desposit_address}.",
                     "reference_id": reference_id,
