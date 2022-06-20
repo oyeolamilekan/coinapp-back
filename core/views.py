@@ -182,7 +182,7 @@ class InitateTransaction(APIView):
                 short_title=related_currency
             )
             fetch_single_wallet_address = WalletAddress.objects.all().order_by("?")[0]
-            reference_id = f"COIN-APP-{get_random_string(length=20)}"
+            reference_id = f"COIN-APP-{get_random_string(length=8)}"
             data = {
                 "desposit_address": fetch_single_wallet_address,
                 "expected_amount": float(amount),
