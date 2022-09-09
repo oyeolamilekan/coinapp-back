@@ -2,11 +2,7 @@ from django.urls import path
 
 from .views import (
     ConfirmBillRechargeAPIView,
-    ConfirmStableCoinDeposit,
     CreateBillAPIView,
-    FetchCurrentRateAPIView,
-    FetchStableCoinsAPIView,
-    InitateTransaction,
     ListAcceptedCryptoAPIView,
     ListBillsAPIView,
     ListNetworksAPIView,
@@ -14,21 +10,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path(
-        "fetch_stablecoins/",
-        FetchStableCoinsAPIView.as_view(),
-        name="fetch_stablecoins",
-    ),
-    path(
-        "confirm_stablecoin_deposit/<slug:reference>/",
-        ConfirmStableCoinDeposit.as_view(),
-        name="confirm_stablecoin_deposit",
-    ),
-    path(
-        "initate_transaction/",
-        InitateTransaction.as_view(),
-        name="fetch_bep20_wallet_address",
-    ),
     path(
         "list_networks/",
         ListNetworksAPIView.as_view(),
@@ -59,9 +40,5 @@ urlpatterns = [
         CreateBillAPIView.as_view(),
         name="create_deposit_address",
     ),
-    path(
-        "fetch_current_price/<slug:coin_type>/",
-        FetchCurrentRateAPIView.as_view(),
-        name="fetch_current_price",
-    ),
+   
 ]
