@@ -16,11 +16,8 @@ from core.models import (
     BlockChainStatus,
     InstantOrderStatus,
     Network,
-    POSTransaction,
-    POSWithdrawal,
     Transaction,
     TransactionStatus,
-    WalletAddress,
 )
 from core.serializers import (
     AcceptedCryptoSerializer,

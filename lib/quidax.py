@@ -1,4 +1,4 @@
 from quidaxapi.quidax import Quidax
 from decouple import config
 
-quidax = Quidax(config("CRYPTO_PROVIDER"))
+quidax = Quidax(config("CRYPTO_PROVIDER_SECRET_KEY"))
